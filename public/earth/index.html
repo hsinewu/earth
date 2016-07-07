@@ -1,0 +1,131 @@
+<html>
+	<head>
+		<title>Three.js app</title>
+		<style>
+			body { margin: 0; }
+			/*canvas { width: 100%; height: 100% }*/
+			/*#container { width: 100%; height: 100% }*/
+			.scroll{
+				width: 60%;
+				height: 10px;
+				left: 20%;
+				background-color: #666;
+				position: absolute;
+				bottom: 60px;
+				border-radius: 5px;
+			}
+			#handle{
+				width: 10px;
+				height: 10px;
+				border-radius: 5px;
+				background-color: #eee;
+				position: absolute;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="scroll"><div id="handle"></div></div>
+		<!-- <canvas id="container"></canvas> -->
+		<div id="container"></div>
+		<!-- <script src="jquery-3.0.0.min.js"></script> -->
+		<script>
+			// var hdl = document.getElementById('handle')
+			// var container = document.getElementById('container')
+			// container.addEventListener('wheel', (wheel) => {
+			// 	hdl.style.left = parseInt(hdl.style.left||0) + wheel.deltaY*3 + 'px'
+			// 	// console.log(wheel)
+			// 	// if(wheel.deltaY>0){
+			// 	// 	hdl.left += 3
+			// 	// }
+			// })
+
+		</script>
+		<script src="three.min.js"></script>
+		<script>
+			var container = document.getElementById('container')
+			// resources
+			var loader = new THREE.TextureLoader();
+			var maps={}, keys, itemN = 0
+			// $('#container').on('wheel', (e,wheel)=>{
+			container.addEventListener('wheel', (wheel) => {
+				// console.log($(this).deltaY)
+				if(wheel.deltaY>0) itemN ++
+				else itemN --
+				materialShell.map = maps[keys[n=(itemN%keys.length+keys.length)%keys.length]]
+				console.log	(keys[n])
+				document.getElementById('handle').style.left = n/keys.length*100 + '%'
+			})
+			// $.get('ls').done( (d) => {
+			get('ls', (d) => {
+				keys = d.split('\n')
+				// d.split('\n').forEach((f)=>console.log('file: '+f))
+				keys.forEach((f)=>{
+					loader.load(
+						'images1/' + f,
+						(texture) => maps[f] = texture
+					)
+							
+				})
+			})
+			// init
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+			var renderer = new THREE.WebGLRenderer();
+			container.appendChild(renderer.domElement)
+			// var renderer = new THREE.WebGLRenderer(container);
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			// document.body.appendChild( renderer.domElement );
+
+			var light	= new THREE.DirectionalLight( 0xcccccc, 1 )
+			light.position.set(5,3,5)
+			scene.add( light )
+			// earth
+			var geometry = new THREE.SphereGeometry(5, 32, 32)
+			var material = new THREE.MeshPhongMaterial()
+			// loader.load('earthmap1k.jpg', (t)=>material.map=t)
+			material.map = THREE.ImageUtils.loadTexture('earthmap1k.jpg')
+			material.bumpMap = THREE.ImageUtils.loadTexture('earthbump1k.jpg')
+			// loader.load('earthbumpmap1k.jpg', (t)=>material.bumpMap=t)
+			material.bumpScale = 0.1
+			material.specularMap    = THREE.ImageUtils.loadTexture('earthspec1k.jpg')
+			var earthMesh = new THREE.Mesh(geometry, material)
+			scene.add(earthMesh)
+			// shell
+			var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
+			var materialShell = new THREE.MeshBasicMaterial()
+			materialShell.map = THREE.ImageUtils.loadTexture('00000.png')
+			materialShell.transparent = true
+			var shellMesh = new THREE.Mesh(geometryShell, materialShell)
+			scene.add(shellMesh)
+
+			camera.position.z = 10;
+
+			var animate = function () {
+				requestAnimationFrame( animate );
+
+				earthMesh.rotation.y += 0.01;
+				shellMesh.rotation.y += 0.01;
+
+				renderer.render(scene, camera);
+			};
+
+			animate();
+
+			function get(path, cb) {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+				 		cb(xhttp.responseText)
+			    	}
+				};
+				xhttp.open("GET", path, true);
+				xhttp.send();
+			}
+
+			function toDataUrl(y, m, d, type){
+				return `${y}${m>9?m:'0'+m}.${d>9?d:'0'+d}00`
+			}
+		</script>
+	</body>
+</html>

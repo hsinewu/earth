@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		canvas{
+			border: 1px solid #000;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="cvs" width="4000" height="2000"></canvas>
+	<select name="" id="list" onchange="loadData(`api.php?data=${this.value}`)">
+		<option value="loading...">loading...</option>
+	</select>
+	<p id="debug"></p>
+	<button onclick="toPng()">to png</button>
+	<script>
+		function drawContours(data){
+			var c = document.getElementById('cvs')
+			var ctx = c.getContext('2d')
+			lines = data.split('\n')
+			for(let i=0; i<lines.length;){
+				let [level, length] = lines[i].split(' ').map(Number);
+				i++;
+				hue = mapTo(level, -40, 40, 240, 0)
+				ctx.strokeStyle = `hsl(${hue},100%,50%)`
+				ctx.beginPath();
+				for (let j=0; j<length; j+=2) {
+					[x, y] = lines[i+j].split(' ').map(Number);
+					[x2, y2] = lines[i+j+1].split(' ').map(Number);
+					y = mapTo(y, -90, 90, 0, c.height)
+					y2 = mapTo(y2, -90, 90, 0, c.height)
+					x*=2;x2*=2;
+					x = mapTo(x, 0, 360, 0, c.width)
+					x2 = mapTo(x2, 0, 360, 0, c.width)
+					ctx.moveTo(x, y);
+					ctx.lineTo(x2, y2);
+				}
+				ctx.stroke();
+				i += length;
+			}
+		}	
+
+		function mapTo(value, fromlower, fromupper, tolower, toupper){
+			// if(value==fromlower) return tolower;
+			return (value - fromlower)/(fromupper-fromlower) * (toupper - tolower) + tolower
+		}
+
+		function toPng(){
+			var c=document.getElementById("cvs");
+			var d=c.toDataURL("image/png");
+			var w=window.open('about:blank','image from canvas');
+			w.document.write("<img src='"+d+"' alt='from canvas'/>");
+		}
+
+		function loadList(path) {
+		  	var xhttp = new XMLHttpRequest();
+		  	xhttp.onreadystatechange = function() {
+		    	if (xhttp.readyState == 4 && xhttp.status == 200) {
+		    		let list = document.getElementById('list');
+			    	list.innerHTML = ''
+			    	for(let name of xhttp.responseText.split('\n')){
+			    		list.innerHTML += `<option value="${name}">${name}</option>`
+			    	}
+			    }
+			};
+		  	xhttp.open("GET", path, true);
+		  	xhttp.send();
+		}
+
+		function loadData(path) {
+		  var xhttp = new XMLHttpRequest();
+		  xhttp.onreadystatechange = function() {
+		    if (xhttp.readyState == 4 && xhttp.status == 200) {
+		      drawContours(xhttp.responseText)
+		    }
+		  };
+		  xhttp.open("GET", path, true);
+		  xhttp.send();
+		}
+		function load(path, cb) {
+		  var xhttp = new XMLHttpRequest();
+		  xhttp.onreadystatechange = function() {
+		    if (xhttp.readyState == 4 && xhttp.status == 200) {
+		      cb(xhttp.responseText)
+		    }
+		  };
+		  xhttp.open("GET", path, true);
+		  xhttp.send();
+		}
+		// loadList('api.php?list')
+		loadData('200908.0100_t_000.txt')
+	</script>
+</body>
+</html>
