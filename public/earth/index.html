@@ -1,11 +1,12 @@
 <html>
 	<head>
-		<title>Three.js app</title>
+		<title>Global temperature</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<style>
 			body { margin: 0; }
 			/*canvas { width: 100%; height: 100% }*/
 			/*#container { width: 100%; height: 100% }*/
-			.scroll{
+			#scroll{
 				width: 60%;
 				height: 10px;
 				left: 20%;
@@ -20,42 +21,98 @@
 				border-radius: 5px;
 				background-color: #eee;
 				position: absolute;
+				/*overflow: hidden;*/
+			}
+			/*#tooltip{
+				visibility: hidden;
+				background-color: #fff;
+				color: #fff;
+				position: absolute;
+				z-index: 1;
+				width: 100px;
+				height: 40px;
+				border-radius: 5px;
+			}
+			#handle:hover #tooltip{
+				visibility: visible;
+			}*/
+			#menu{
+				width: 50px;
+				height: 25px;
+				padding: 10px;
+				background-color: hsla(0, 0%, 90%, 0.8);
+				position: absolute;
+				bottom: 50px;
+				left: 20px;
+				transition: width 0.5s, height 0.5s;
+				overflow: hidden;
+				font-size: 1.5em;
+				border-radius: 5px;
+			}
+			#menu:hover{
+				height: 300px;
+				width: 200px;
+			}
+			#menu-list{
+				/*list-style: none;*/
+			}
+			#date{
+				width: 100px;
 			}
 		</style>
 	</head>
 	<body>
-		<div class="scroll"><div id="handle"></div></div>
-		<!-- <canvas id="container"></canvas> -->
+		<div id="scroll"><div id="handle"><!-- <div id="tooltip">use mouse wheel for now</div> --></div></div>
 		<div id="container"></div>
-		<!-- <script src="jquery-3.0.0.min.js"></script> -->
-		<script>
-			// var hdl = document.getElementById('handle')
-			// var container = document.getElementById('container')
-			// container.addEventListener('wheel', (wheel) => {
-			// 	hdl.style.left = parseInt(hdl.style.left||0) + wheel.deltaY*3 + 'px'
-			// 	// console.log(wheel)
-			// 	// if(wheel.deltaY>0){
-			// 	// 	hdl.left += 3
-			// 	// }
-			// })
+		<div id="menu">選單
+			<form onsubmit="showUrl(); return false;" id="menu-list">
+				____________<br>
+				日期：
+				<input type="text" name="date" id="date" placeholder="yyyy/mm/dd" pattern="[12]\d{3}/[01]?\d/[0-3]?\d" required" value="2009/08/01"><br>
+				時刻：
+				<select name="time" id="time">
+					<option value="0">6:00</option>
+					<option value="1">12:00</option>
+					<option value="2">18:00</option>
+					<option value="2">0:00</option>
+				</select><br>
+				高度：
+				<select name="height" id="height">
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+				</select><br>
+				類別：氣溫<br>
+				陰影：<span onclick="directLight.intensity=1;ambientLight.intensity=0">on</span> -
+				<span onclick="directLight.intensity=0;ambientLight.intensity=1">off</span><br>
+				<input type="submit" value="發送" >
+			</form>
 
-		</script>
+		</div>
+		<!-- <script src="jquery-3.0.0.min.js"></script> -->
 		<script src="three.min.js"></script>
+		<script src="OrbitControls.js"></script>
 		<script>
 			var container = document.getElementById('container')
 			// resources
 			var loader = new THREE.TextureLoader();
 			var maps={}, keys, itemN = 0
-			// $('#container').on('wheel', (e,wheel)=>{
-			container.addEventListener('wheel', (wheel) => {
-				// console.log($(this).deltaY)
-				if(wheel.deltaY>0) itemN ++
-				else itemN --
-				materialShell.map = maps[keys[n=(itemN%keys.length+keys.length)%keys.length]]
-				console.log	(keys[n])
-				document.getElementById('handle').style.left = n/keys.length*100 + '%'
-			})
-			// $.get('ls').done( (d) => {
+			// container.addEventListener('wheel', (wheel) => {
+			// 	// console.log($(this).deltaY)
+			// 	if(wheel.deltaY>0) itemN ++
+			// 	else itemN --
+			// 	materialShell.map = maps[keys[n=(itemN%keys.length+keys.length)%keys.length]]
+			// 	console.log	(keys[n])
+			// 	document.getElementById('handle').style.left = n/keys.length*100 + '%'
+			// })
+			document.getElementById('scroll').addEventListener('click', ()=>playMaps(0))
+			function playMaps(n){
+				if(n>=keys.length) return
+				console.log(keys[n])
+				materialShell.map = maps[keys[n]]
+				setTimeout(()=>playMaps(n+1), 100)
+			}
 			get('ls', (d) => {
 				keys = d.split('\n')
 				// d.split('\n').forEach((f)=>console.log('file: '+f))
@@ -76,10 +133,17 @@
 			// var renderer = new THREE.WebGLRenderer(container);
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			// document.body.appendChild( renderer.domElement );
-
-			var light	= new THREE.DirectionalLight( 0xcccccc, 1 )
-			light.position.set(5,3,5)
-			scene.add( light )
+			var controls = new THREE.OrbitControls( camera, renderer.domElement );
+			controls.maxDistance = 12;
+			controls.minDistance = 6;
+			controls.maxPolarAngle = Math.PI/8*7; 
+			controls.minPolarAngle = Math.PI/8; 
+			controls.enablePan = false
+			var directLight	= new THREE.DirectionalLight( 0xcccccc, 1)
+			var ambientLight	= new THREE.AmbientLight( 0xcccccc, 0)
+			directLight.position.set(5,3,5)
+			scene.add( directLight )
+			scene.add( ambientLight )
 			// earth
 			var geometry = new THREE.SphereGeometry(5, 32, 32)
 			var material = new THREE.MeshPhongMaterial()
@@ -99,13 +163,13 @@
 			var shellMesh = new THREE.Mesh(geometryShell, materialShell)
 			scene.add(shellMesh)
 
-			camera.position.z = 10;
+			camera.position.z = 12;
 
 			var animate = function () {
 				requestAnimationFrame( animate );
 
-				earthMesh.rotation.y += 0.01;
-				shellMesh.rotation.y += 0.01;
+				earthMesh.rotation.y += 0.002;
+				shellMesh.rotation.y += 0.002;
 
 				renderer.render(scene, camera);
 			};
@@ -123,8 +187,16 @@
 				xhttp.send();
 			}
 
-			function toDataUrl(y, m, d, type){
-				return `${y}${m>9?m:'0'+m}.${d>9?d:'0'+d}00`
+			function showUrl(){
+				let date = document.getElementById('date')
+				let height = document.getElementById('height')
+				let time = document.getElementById('time')
+				let url = toDataUrl(...date.value.split('/').map(Number), 't', Number(time.value), Number(height.value))
+				alert(url)
+			}
+			function toDataUrl(y, m, d, type, time, h){
+				let serial = time*16+h
+				return `${y}${m>9?m:'0'+m}.${d>9?d:'0'+d}00_t_${serial>9?'0'+serial:'00'+serial}.png`
 			}
 		</script>
 	</body>
