@@ -38,7 +38,7 @@
             }*/
             #menu{
                 width: 50px;
-                height: 25px;
+                height: 22px;   /* 假的O3O */
                 padding: 10px;
                 background-color: hsla(0, 0%, 90%, 0.8);
                 position: absolute;
@@ -106,7 +106,9 @@
         </div>
         <div id="container"></div>
         <div id="menu">選單
-            <form onsubmit="showUrl(); return false;">
+            <input type="checkbox" name="" id="" checked="false" onchange="if(this.checked)menu.style='width:200px;height:300px;';else menu.style=''">
+
+            <form onsubmit="alert(showUrl());materialShell.map=maps[showUrl()]; return false;">
                 ____________<br>
                 日期：
                 <input type="text" name="date" id="date" placeholder="yyyy/mm/dd" pattern="[12]\d{3}/[01]?\d/[0-3]?\d" required" value="2009/08/01"><br>
@@ -119,14 +121,22 @@
                 </select><br>
                 高度：
                 <select name="height" id="height">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
+                    <option value="0">10</option>
+                    <option value="1">30</option>
+                    <option value="2">50</option>
+                    <option value="3">70</option>
+                    <option value="4">100</option>
+                    <option value="5">150</option>
+                    <option value="6">200</option>
+                    <option value="7">250</option>
+                    <option value="8">300</option>
+                    <option value="9">400</option>
+                    <option value="10">500</option>
+                    <option value="11">600</option>
+                    <option value="12">700</option>
+                    <option value="13">850</option>
+                    <option value="14">925</option>
+                    <option value="15">1000</option>
                 </select><br>
                 類別：氣溫<br>
                 陰影：<span onclick="directLight.intensity=1;ambientLight.intensity=0">on</span> -
@@ -252,7 +262,7 @@
                 let height = document.getElementById('height')
                 let time = document.getElementById('time')
                 let url = toDataUrl(...date.value.split('/').map(Number), 't', Number(time.value), Number(height.value))
-                alert(url)
+                return url
             }
             function toDataUrl(y, m, d, type, time, h){
                 let serial = time*16+h
