@@ -41,6 +41,7 @@
                 height: 22px;   /* 假的O3O */
                 padding: 10px;
                 background-color: hsla(0, 0%, 90%, 0.8);
+                box-shadow: inset 0px 1px 0px #fff;
                 position: absolute;
                 bottom: 50px;
                 left: 20px;
@@ -101,14 +102,14 @@
             <div id="handle"></div>
         </div>
         <div id="player">
-            <div id="play-button"></div>
+            <div id="play-button" onclick="tog();playMaps()"></div>
             <div id="pause-button" onclick="clearTimeout(play_id);tog();" hidden></div>
         </div>
         <div id="container"></div>
         <div id="menu">選單
             <input type="checkbox" name="" id="" checked="false" onchange="if(this.checked)menu.style='width:200px;height:300px;';else menu.style=''">
 
-            <form onsubmit="alert(showUrl());materialShell.map=maps[showUrl()]; return false;">
+            <form onsubmit="setMap(showUrl()); return false;">
                 ____________<br>
                 日期：
                 <input type="text" name="date" id="date" placeholder="yyyy/mm/dd" pattern="[12]\d{3}/[01]?\d/[0-3]?\d" required" value="2009/08/01"><br>
@@ -154,7 +155,7 @@
             var container = document.getElementById('container')
             // resources
             var loader = new THREE.TextureLoader();
-            var maps={}, keys, itemN = 0
+            var maps={}, itemN = 0
             // container.addEventListener('wheel', (wheel) => {
             //  // console.log($(this).deltaY)
             //  if(wheel.deltaY>0) itemN ++
@@ -165,35 +166,37 @@
             // })
             var play = document.getElementById('play-button')
             var pause = document.getElementById('pause-button')
-            var play_id, play_n=0;
+            var play_id, play_fn='200908.0100_t_001';
             function tog(){
                 pause.hidden = play.hidden
                 play.hidden = !play.hidden
             }
-            play.addEventListener('click', ()=>{tog();playMaps();})
+            // play.addEventListener('click', ()=>{tog();playMaps();})
             function playMaps(){
-                if(play_n>=keys.length){
-                    play_n=0
+                let next = Number(play_fn.slice(-2))
+                // console.log('next = ' + next)
+
+                if( next+16<64 ){
+                    setMap(play_fn.slice(0,-2)+(next+16))
+                    setTimeout(playMaps, 200)
+                }else{
                     tog()
-                    return
                 }
-                console.log(keys[play_n])
-                materialShell.map = maps[keys[play_n]]
-                // play_id = setTimeout(()=>playMaps(play_n+1), 100)
-                play_n++;
-                play_id = setTimeout(playMaps, 100)
             }
-            get('ls', (d) => {
-                keys = d.split('\n')
-                // d.split('\n').forEach((f)=>console.log('file: '+f))
-                keys.forEach((f)=>{
-                    loader.load(
-                        'images1/' + f,
-                        (texture) => maps[f] = texture
-                    )
-                            
-                })
-            })
+            // function playMaps(){
+
+            //     if(play_n>=keys.length){
+            //         play_n=0
+            //         tog()
+            //         return
+            //     }
+            //     console.log(keys[play_n])
+            //     materialShell.map = maps[keys[play_n]]
+            //     // play_id = setTimeout(()=>playMaps(play_n+1), 100)
+            //     play_n++;
+            //     play_id = setTimeout(playMaps, 100)
+            // }
+
             // init
             var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
@@ -257,6 +260,14 @@
                 xhttp.send();
             }
 
+            function setMap(fname){
+                if(!(fname in maps)){
+                    maps[fname] = THREE.ImageUtils.loadTexture('images1/'+fname+'.png')
+                    console.log('loading '+fname)
+                }
+                materialShell.map = maps[fname]
+                play_fn = fname
+            }
             function showUrl(){
                 let date = document.getElementById('date')
                 let height = document.getElementById('height')
@@ -266,7 +277,7 @@
             }
             function toDataUrl(y, m, d, type, time, h){
                 let serial = time*16+h
-                return `${y}${m>9?m:'0'+m}.${d>9?d:'0'+d}00_t_${serial>9?'0'+serial:'00'+serial}.png`
+                return `${y}${m>9?m:'0'+m}.${d>9?d:'0'+d}00_t_${serial>9?'0'+serial:'00'+serial}`
             }
         </script>
     </body>
