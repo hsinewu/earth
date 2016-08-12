@@ -2,57 +2,34 @@
     <head>
         <title>Global temperature</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+        <script>if(!document.querySelector('link[href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"]').length)document.write('<link rel="stylesheet" href="css/font-awesome.min.css">')</script>
+        <!-- <link rel="stylesheet" href="css/font-awesome.min.css"> -->
+        <link rel="stylesheet" href="css/temperature.css">
         <style>
             body { margin: 0; }
             /*canvas { width: 100%; height: 100% }*/
             /*#container { width: 100%; height: 100% }*/
-            #scroll{
-                width: 60%;
-                height: 10px;
-                left: 20%;
+            #label{
+                width: 30%;
+                height: 40px;
+                opacity: 0;
+                left: 35%;
+                font-size: 32px;
                 background-color: #666;
                 position: absolute;
-                bottom: 60px;
-                border-radius: 5px;
+                bottom: 100px;
+                transition: opacity 1.5s;
+                text-align: center;
             }
-            #handle{
-                width: 10px;
-                height: 10px;
-                border-radius: 5px;
-                background-color: #eee;
-                position: absolute;
-                /*overflow: hidden;*/
-            }
-            /*#tooltip{
-                visibility: hidden;
-                background-color: #fff;
-                color: #fff;
-                position: absolute;
-                z-index: 1;
-                width: 100px;
-                height: 40px;
-                border-radius: 5px;
-            }
-            #handle:hover #tooltip{
-                visibility: visible;
-            }*/
-            #menu{
-                width: 50px;
-                height: 22px;   /* 假的O3O */
-                padding: 10px;
-                background-color: hsla(0, 0%, 90%, 0.8);
-                box-shadow: inset 0px 1px 0px #fff;
-                position: absolute;
-                bottom: 50px;
-                left: 20px;
-                transition: width 0.5s, height 0.5s;
-                overflow: hidden;
-                font-size: 1.5em;
-                border-radius: 5px;
+            #label.hover{
+                transition-property: none;
+                opacity: .9;
             }
             #menu:hover{
                 height: 300px;
                 width: 200px;
+                transition-delay: 0s;
             }
             #date{
                 width: 100px;
@@ -60,225 +37,290 @@
             #player{
                 position: absolute;
                 bottom: 55px;
-                left: 185px;
+                left: 8%;
             }
-            #play-button{
-                border-top: 10px solid transparent;
-                border-left: 20px solid #ccc;
-                border-bottom: 10px solid transparent;
+            #play-button, #pause-button {
+                color: #fff;
             }
-            #play-button:hover{
-                border-left: 20px solid #fff;
-            }
-            #pause-button{
-                width: 30px;
-                height: 30px;
-                position: relative;
-                top: 10px;
-                right: 7px;
-                /*display: block;*/
-            }
-            #pause-button:before, #pause-button:after {
-                width: 12%;
-                height: 75%;
-                background: #ccc;
-                position: absolute;
-                content: "";
-                /*top: 10px;*/
-            }
-            #pause-button:hover:before, #pause-button:hover:after {
-                background: #fff;
-            }
-            #pause-button:before {
-                left: 30%;
-            }
-            #pause-button:after {
-                right: 30%;
+            span.on{
+                background-color: #888;
             }
         </style>
     </head>
     <body>
-        <div id="scroll">
-            <div id="handle"></div>
-        </div>
+        <div id="label">2016/8/9</div>
         <div id="player">
-            <div id="play-button" onclick="tog();playMaps()"></div>
-            <div id="pause-button" onclick="clearTimeout(play_id);tog();" hidden></div>
+            <i id="play-button" class="fa fa-play fa-3x" onclick="tog();playMaps();"></i>
+            <i id="pause-button" class="fa fa-pause fa-3x" style="display: none" onclick="tog(1);clearTimeout(play_id);"></i>
+            <!-- <div id="play-button" onclick="tog();playMaps()"></div> -->
+            <!-- <div id="pause-button" onclick="clearTimeout(play_id);tog();" hidden></div> -->
+        </div>
+        <div id="t">
+            <div id="t-legend">
+                <div id="t-legend-text">
+                    <span>40</span>
+                    <span>20</span>
+                    <span>0</span>
+                    <span>-20</span>
+                    <span>-40</span>
+                </div>
+                <div id="t-legend-celsius">°C</div>
+            </div>
+            <!-- <div id="t-ctrls">
+                <div id="t-datetimes">
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 1, 0, 0))">00</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 1, 1, 0))">06</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 1, 2, 0))">12</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 1, 3, 0))">18</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 2, 0, 0))">00</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 2, 1, 0))">06</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 2, 2, 0))">12</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 2, 3, 0))">18</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 3, 0, 0))">00</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 3, 1, 0))">06</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 3, 2, 0))">12</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 3, 3, 0))">18</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 4, 0, 0))">00</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 4, 1, 0))">06</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 4, 2, 0))">12</span>
+                    <span class="t-time" onclick="setMap(toTmptUrl(2009, 8, 4, 3, 0))">18</span>
+                    <span class="t-date">0801</span>
+                    <span class="t-date">0802</span>
+                    <span class="t-date">0803</span>
+                    <span class="t-date">0804</span>
+                </div>
+            </div> -->
         </div>
         <div id="container"></div>
-        <div id="menu">選單
-            <input type="checkbox" name="" id="" checked="false" onchange="if(this.checked)menu.style='width:200px;height:300px;';else menu.style=''">
-
-            <form onsubmit="setMap(showUrl()); return false;">
-                ____________<br>
-                日期：
-                <input type="text" name="date" id="date" placeholder="yyyy/mm/dd" pattern="[12]\d{3}/[01]?\d/[0-3]?\d" required" value="2009/08/01"><br>
-                時刻：
-                <select name="time" id="time">
-                    <option value="0">6:00</option>
-                    <option value="1">12:00</option>
-                    <option value="2">18:00</option>
-                    <option value="3">0:00</option>
-                </select><br>
-                高度：
-                <select name="height" id="height">
-                    <option value="0">10</option>
-                    <option value="1">30</option>
-                    <option value="2">50</option>
-                    <option value="3">70</option>
-                    <option value="4">100</option>
-                    <option value="5">150</option>
-                    <option value="6">200</option>
-                    <option value="7">250</option>
-                    <option value="8">300</option>
-                    <option value="9">400</option>
-                    <option value="10">500</option>
-                    <option value="11">600</option>
-                    <option value="12">700</option>
-                    <option value="13">850</option>
-                    <option value="14">925</option>
-                    <option value="15">1000</option>
-                </select><br>
-                類別：氣溫<br>
-                陰影：<span onclick="directLight.intensity=1;ambientLight.intensity=0">on</span> -
-                <span onclick="directLight.intensity=0;ambientLight.intensity=1">off</span><br>
-                <input type="submit" value="發送" >
-            </form>
-
-        </div>
         <!-- <script src="jquery-3.0.0.min.js"></script> -->
-        <script src="three.min.js"></script>
-        <script src="OrbitControls.js"></script>
+        <!-- <script src="jquery-2.1.4.js"></script> -->
+        <script scr="//cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script><script>window.THREE||document.write('<script src="js/three.min.js"><\/script>');</script>
+        <script src="js/OrbitControls.js"></script>
         <script>
-            
-
-            var container = document.getElementById('container')
-            // resources
-            var loader = new THREE.TextureLoader();
-            var maps={}, itemN = 0
-            // container.addEventListener('wheel', (wheel) => {
-            //  // console.log($(this).deltaY)
-            //  if(wheel.deltaY>0) itemN ++
-            //  else itemN --
-            //  materialShell.map = maps[keys[n=(itemN%keys.length+keys.length)%keys.length]]
-            //  console.log (keys[n])
-            //  document.getElementById('handle').style.left = n/keys.length*100 + '%'
-            // })
-            var play = document.getElementById('play-button')
-            var pause = document.getElementById('pause-button')
-            var play_id, play_fn='200908.0100_t_001';
-            function tog(){
-                pause.hidden = play.hidden
-                play.hidden = !play.hidden
+            // utils
+            function setz(num, width){
+                num = +num;
+                num = num.toString();
+                while(num.length < width)
+                    num = '0' + num
+                return num
             }
-            // play.addEventListener('click', ()=>{tog();playMaps();})
-            function playMaps(){
-                let next = Number(play_fn.slice(-2))
-                // console.log('next = ' + next)
-
-                if( next+16<64 ){
-                    setMap(play_fn.slice(0,-2)+(next+16))
-                    setTimeout(playMaps, 200)
-                }else{
-                    tog()
-                }
-            }
-            // function playMaps(){
-
-            //     if(play_n>=keys.length){
-            //         play_n=0
-            //         tog()
-            //         return
-            //     }
-            //     console.log(keys[play_n])
-            //     materialShell.map = maps[keys[play_n]]
-            //     // play_id = setTimeout(()=>playMaps(play_n+1), 100)
-            //     play_n++;
-            //     play_id = setTimeout(playMaps, 100)
-            // }
-
-            // init
-            var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-
-            var renderer = new THREE.WebGLRenderer();
-            container.appendChild(renderer.domElement)
-            // var renderer = new THREE.WebGLRenderer(container);
-            renderer.setSize( window.innerWidth, window.innerHeight );
-            // document.body.appendChild( renderer.domElement );
-            var controls = new THREE.OrbitControls( camera, renderer.domElement );
-            controls.maxDistance = 12;
-            controls.minDistance = 6;
-            controls.maxPolarAngle = Math.PI/8*7; 
-            controls.minPolarAngle = Math.PI/8; 
-            controls.enablePan = false
-            var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
-            var ambientLight    = new THREE.AmbientLight( 0xcccccc, 0)
-            directLight.position.set(5,3,5)
-            scene.add( directLight )
-            scene.add( ambientLight )
-            // earth
-            var geometry = new THREE.SphereGeometry(5, 32, 32)
-            var material = new THREE.MeshPhongMaterial()
-            // loader.load('earthmap1k.jpg', (t)=>material.map=t)
-            material.map = THREE.ImageUtils.loadTexture('earthmap1k.jpg')
-            material.bumpMap = THREE.ImageUtils.loadTexture('earthbump1k.jpg')
-            // loader.load('earthbumpmap1k.jpg', (t)=>material.bumpMap=t)
-            material.bumpScale = 0.1
-            material.specularMap    = THREE.ImageUtils.loadTexture('earthspec1k.jpg')
-            var earthMesh = new THREE.Mesh(geometry, material)
-            scene.add(earthMesh)
-            // shell
-            var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
-            var materialShell = new THREE.MeshBasicMaterial()
-            materialShell.map = THREE.ImageUtils.loadTexture('00000.png')
-            materialShell.transparent = true
-            var shellMesh = new THREE.Mesh(geometryShell, materialShell)
-            scene.add(shellMesh)
-
-            camera.position.z = 12;
-
-            var animate = function () {
-                requestAnimationFrame( animate );
-
-                earthMesh.rotation.y += 0.002;
-                shellMesh.rotation.y += 0.002;
-
-                renderer.render(scene, camera);
-            };
-
-            animate();
-
-            function get(path, cb) {
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (xhttp.readyState == 4 && xhttp.status == 200) {
-                        cb(xhttp.responseText)
+        </script>
+        <script>
+            // function initMain(){
+                // var menu = document.getElementById('menu')
+                // menu.addEventListener('click', function(){
+                //     // menu.
+                // })
+                // var pin = document.getElementById('pin')
+                // pin.checked = false
+                // var t_time = document.getElementById('t-time')
+                // t_time.value = 0
+                var play = document.getElementById('play-button')
+                var pause = document.getElementById('pause-button')
+                var play_id, play_fn='200908.0100_t_001';
+                function tog(isPlay){
+                    if(isPlay){
+                        play.style = ''
+                        pause.style = 'display: none'
+                    }else{
+                        play.style = 'display: none'
+                        pause.style = ''
                     }
-                };
-                xhttp.open("GET", path, true);
-                xhttp.send();
-            }
-
-            function setMap(fname){
-                if(!(fname in maps)){
-                    maps[fname] = THREE.ImageUtils.loadTexture('images1/'+fname+'.png')
-                    console.log('loading '+fname)
                 }
-                materialShell.map = maps[fname]
-                play_fn = fname
-            }
-            function showUrl(){
-                let date = document.getElementById('date')
-                let height = document.getElementById('height')
-                let time = document.getElementById('time')
-                let url = toDataUrl(...date.value.split('/').map(Number), 't', Number(time.value), Number(height.value))
-                return url
-            }
-            function toDataUrl(y, m, d, type, time, h){
-                let serial = time*16+h
-                return `${y}${m>9?m:'0'+m}.${d>9?d:'0'+d}00_t_${serial>9?'0'+serial:'00'+serial}`
-            }
+
+                // time.addEventListener('wheel', (w)=>{
+                //     w.deltaY>0 ? ++time.value: --time.value
+                //     time.value = +time.value
+                // })
+                // height.addEventListener('wheel', (w)=>{
+                //     w.deltaY>0 ? ++height.value: --height.value
+                //     height.value = +height.value
+                // })
+
+                // var spans = document.getElementsByTagName('span')
+                function setShadow(on){
+                    directLight.intensity  = +on;
+                    ambientLight.intensity =+!on +.1;
+                    // spans[+!on].className = "on"
+                    // spans[ +on].className = ""
+                }
+
+                var label = document.getElementById('label')
+                label.addEventListener('mouseenter', (m)=>{
+                    label.classList.add('hover')
+                })
+                label.addEventListener('mouseleave', (m)=>{
+                    label.classList.remove('hover')
+                })
+
+                var container = document.getElementById('container')
+                var loader = new THREE.TextureLoader();
+                var maps={}, itemN = 0
+                
+                // init
+                var scene = new THREE.Scene();
+                var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+                var renderer = new THREE.WebGLRenderer();
+                container.appendChild(renderer.domElement)
+                // var renderer = new THREE.WebGLRenderer(container);
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                // document.body.appendChild( renderer.domElement );
+                var controls = new THREE.OrbitControls( camera, renderer.domElement );
+                controls.maxDistance = 12;
+                controls.minDistance = 6;
+                controls.maxPolarAngle = Math.PI/8*7; 
+                controls.minPolarAngle = Math.PI/8; 
+                controls.enablePan = false
+                var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
+                var ambientLight    = new THREE.AmbientLight( 0xcccccc, .1)
+                directLight.position.set(5,3,5)
+                scene.add( directLight )
+                scene.add( ambientLight )
+                // earth
+                var geometry = new THREE.SphereGeometry(5, 32, 32)
+                var material = new THREE.MeshPhongMaterial()
+                material.map = THREE.ImageUtils.loadTexture('textures/earthmap1k.jpg')
+                material.bumpMap = THREE.ImageUtils.loadTexture('textures/earthbump1k.jpg')
+                material.bumpScale = 0.1
+                material.specularMap    = THREE.ImageUtils.loadTexture('textures/earthspec1k.jpg')
+                loader.load('textures/earthmap4k.jpg', (t)=>material.map=t)
+                loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t)
+                var earthMesh = new THREE.Mesh(geometry, material)
+                scene.add(earthMesh)
+                // shell
+                var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
+                var materialShell = new THREE.MeshBasicMaterial()
+                materialShell.map = THREE.ImageUtils.loadTexture('images2/200908.0100_t_016.png')
+                materialShell.transparent = true
+                var shellMesh = new THREE.Mesh(geometryShell, materialShell)
+                scene.add(shellMesh)
+
+                camera.position.z = 12;
+
+                var tmpt
+                var animate = function () {
+                    requestAnimationFrame( animate );
+
+                    earthMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
+                    shellMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
+
+                    renderer.render(scene, camera);
+                };
+
+                animate();
+
+                // function get(path, cb) {
+                //     var xhttp = new XMLHttpRequest();
+                //     xhttp.onreadystatechange = function() {
+                //         if (xhttp.readyState == 4 && xhttp.status == 200) {
+                //             cb(xhttp.responseText)
+                //         }
+                //     };
+                //     xhttp.open("GET", path, true);
+                //     xhttp.send();
+                // }
+                function playMaps(){
+                    let next = +play_fn.slice(-2)
+                    next += 16
+                    if(next>63){
+                        next %= 16
+                        play_fn = play_fn.replace(/(\d\d)00_t/, function(s, a){
+                            a = +a + 1
+                            return setz(a, 2) + '00_t'
+                        })
+                        setMap(play_fn.slice(0,-2)+setz(next, 2), playMaps)
+                    }else{
+                        setMap(play_fn.slice(0,-2)+next, playMaps)
+                    }
+                }
+                
+                // function getUrl(){
+                //     let date = document.getElementById('date')
+                //     let height = document.getElementById('height')
+                //     let time = document.getElementById('time')
+                //     let url = toTmptUrl(...date.value.split('/').map(Number), 't', +time.value, +height.value)
+                //     return url
+                // }
+                
+            // }
+            // window.onload = function() {
+            //     initMain()
+            //     initTmpt()
+            // }
+        </script>
+        <script src="js/dat.gui.min.js"></script>
+        <script>
+            // function initTmpt(){
+                tmpt = {
+                    year: 2009,
+                    month: 8,
+                    day: 2,
+                    hour: 0,
+                    height: 0,
+                    playInterval: 1000,
+                    rotationSpeed: 2,
+                    shadow: true
+                }
+                function update(){
+                    // alert(toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
+                    setMap(toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
+                }
+                var gui = new dat.GUI();
+                var tgui = gui.addFolder('Temparature')
+                // tgui.remember()
+                tgui.add(tmpt, 'year', [2009]).onChange(update);
+                tgui.add(tmpt, 'month', [8]).onChange(update);
+                tgui.add(tmpt, 'day', [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]).onChange(update);
+                tgui.add(tmpt, 'hour', {
+                    '0:00': 0, '6:00': 1, '12:00': 2, '18:00': 3
+                }).onChange(update);
+                tgui.add(tmpt, 'height', {
+                "10": 0, "30": 1, "50": 2, "70": 3, "100": 4, "150": 5, "200": 6, "250": 7, "300": 8, "400": 9, "500": 10, "600": 11, "700": 12, "850":   13, "925": 14, "1000": 15
+                }).onChange(update);
+                tgui.add(tmpt, 'playInterval', 100, 5000);
+                tgui.add(tmpt, 'rotationSpeed', 0, 100).step(1);
+                tgui.add(tmpt, 'shadow').onChange(setShadow);
+                tgui.open();
+                // fname: no .png posfix
+                function setMap(fname, cb){
+                    function _setMap(t){
+                        materialShell.map = t;
+                        play_fn = fname;
+                        label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
+                            return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`
+                        });
+                        // label.innerText = tmpt.year + '/' + tmpt.month + '/' + tmpt.day
+                        label.classList.add('hover')
+                        setTimeout(()=>{label.classList.remove('hover')}, 100)
+                        if(cb) {play_id = setTimeout(cb, tmpt.playInterval);}
+                    }
+                    if(fname in maps){
+                        _setMap( maps[fname])
+                    }else{
+                        let url = 'images2/'+fname+'.png'
+                        // maps[fname] = THREE.ImageUtils.loadTexture(url)
+                        // console.log('loading '+fname)
+                        loader.load(url, (texture)=>{
+                            _setMap( maps[fname]=texture)
+                        }, (xhr)=>{
+                            console.log( (xhr.loaded / xhr.total * 100) + '% loaded')
+                        }, (xhr)=>{
+                            // what the hell XDD
+                            if(cb) tog()
+                            else
+                            alert('404')
+                        })
+                    }
+                }
+
+                function toTmptUrl(y, m, d, t, h){
+                    y=+y; m=+m; d=+d; t=+t; h=+h;
+                    let serial = t*16+h
+                    return `${y}${setz(m, 2)}.${setz(d, 2)}00_t_${setz(serial, 3)}`
+                }
+            // }
         </script>
     </body>
 </html>
