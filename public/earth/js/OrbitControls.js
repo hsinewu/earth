@@ -16,6 +16,7 @@
 THREE.OrbitControls = function ( object, domElement ) {
 
 	this.object = object;
+	this.scale = ()=>scale;
 
 	this.domElement = ( domElement !== undefined ) ? domElement : document;
 

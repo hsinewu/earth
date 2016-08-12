@@ -1,0 +1,61 @@
+#t-legend{
+	position: absolute;
+	bottom: 10%;
+	right: 25px;
+	width: 22px;
+	height: 250px;
+	background: linear-gradient(to bottom, #f00, #ff0, #0f0, #0ff, #00f);
+	/*background: linear-gradient(to bottom, hsl(240, 100%, 50%), hsl(0, 100%, 50%));*/
+}
+#t-legend-text{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	position: absolute;
+	left: -30px;
+	color: #fff;
+	font-size: 16px;
+}
+#t-legend-celsius{
+	position: absolute;
+	top: -18px;
+	left: -9px;
+	font-size: 12px;
+	color: #fff;
+}
+#t-ctrls{
+	position: absolute;
+	background-color: rgba(255,255,255,.1);
+	width: 80%;
+	height: 50px;
+	left: 10%;
+	bottom: 10px;
+	display: flex;
+}
+#t-time{
+	margin: 0px;
+	position: absolute;
+	width: 100%;
+}
+#t-datetimes{
+	width: 100%;
+	/*height: 100%;*/
+	/*border: 1px solid #f00;*/
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-around;
+	align-items: center;
+	color: #fff;
+}
+.t-time{
+	/*flex: 1;*/
+	text-align: center;
+	width: calc(100%/16);
+}
+.t-date{
+	width: calc(90%/4);
+	text-align: center;
+	background-color: #333;
+}
