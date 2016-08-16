@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Global temperature</title>
+        <title>🌎</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
         <script>if(!document.querySelector('link[href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"]').length)document.write('<link rel="stylesheet" href="css/font-awesome.min.css">')</script>
@@ -42,18 +42,34 @@
             #play-button, #pause-button {
                 color: #fff;
             }
-            span.on{
+            /*span.on{
                 background-color: #888;
+            }*/
+            #area-panel{
+                position: absolute;
+                display: flex;
+                justify-content: space-around;  
+                flex-direction: column;
+                width: 150px;
+                height: 150px;
+                background-color: #fff;
+                top: 10px;
+                left: 10px;
             }
         </style>
     </head>
     <body>
+        <div id="container"></div>
         <div id="label">2016/8/9</div>
         <div id="player">
             <i id="play-button" class="fa fa-play fa-3x" onclick="tog();playMaps();"></i>
             <i id="pause-button" class="fa fa-pause fa-3x" style="display: none" onclick="tog(1);clearTimeout(play_id);"></i>
             <!-- <div id="play-button" onclick="tog();playMaps()"></div> -->
             <!-- <div id="pause-button" onclick="clearTimeout(play_id);tog();" hidden></div> -->
+        </div>
+        <div id="area-panel">
+            <span onclick="setSphereCam(70, 40)">East Aisa</span>
+            <span onclick="setSphereCam(280, -50)">North America</span>
         </div>
         <div id="t">
             <div id="t-legend">
@@ -91,9 +107,11 @@
                 </div>
             </div> -->
         </div>
-        <div id="container"></div>
         <!-- <script src="jquery-3.0.0.min.js"></script> -->
         <!-- <script src="jquery-2.1.4.js"></script> -->
+        <script src="js/Tween.js"></script>
+        <!-- <script src="js/tweenjs.min.js"></script> -->
+        <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/tweenjs/0.6.1/tweenjs.min.js"></script> -->
         <script scr="//cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script><script>window.THREE||document.write('<script src="js/three.min.js"><\/script>');</script>
         <script src="js/OrbitControls.js"></script>
         <script>
@@ -105,20 +123,28 @@
                     num = '0' + num
                 return num
             }
+
+            // angles in degrees
+            function sphereToXyz(radius, theta, rho){
+                theta = theta * Math.PI / 180
+                rho = rho * Math.PI / 180
+                return [
+                    radius * Math.sin(rho) * Math.cos(theta),
+                    radius * Math.sin(rho) * Math.sin(theta),
+                    radius * Math.cos(rho)
+                ]
+            }
+
+            window.onload = function(){
+                // This should removed later
+                setShadow(0)
+            }
         </script>
         <script>
             // function initMain(){
-                // var menu = document.getElementById('menu')
-                // menu.addEventListener('click', function(){
-                //     // menu.
-                // })
-                // var pin = document.getElementById('pin')
-                // pin.checked = false
-                // var t_time = document.getElementById('t-time')
-                // t_time.value = 0
                 var play = document.getElementById('play-button')
                 var pause = document.getElementById('pause-button')
-                var play_id, play_fn='200908.0100_t_001';
+                var play_id, currentTmpt='200908.0100_t_001';
                 function tog(isPlay){
                     if(isPlay){
                         play.style = ''
@@ -128,17 +154,20 @@
                         pause.style = ''
                     }
                 }
+                function setSphereCam( theta, rho){
+                    var tar = sphereToXyz(8, theta, rho)
+                    // tween = new TWEEN.Tween(camera.position).to(tar, 1000).onUpdate(function() {
+                    //     console.log("幹你娘")
+                    //     camera.position.set( ...tar);
+                    //     camera.lookAt( new THREE.Vector3(0,0,0));
+                    // }).onComplete(function() {
+                    //     camera.position.set( ...tar);
+                    //     camera.lookAt( new THREE.Vector3(0,0,0));
+                    // }).start();
+                    camera.position.set( ...tar);
+                    camera.lookAt( new THREE.Vector3(0,0,0));
+                }
 
-                // time.addEventListener('wheel', (w)=>{
-                //     w.deltaY>0 ? ++time.value: --time.value
-                //     time.value = +time.value
-                // })
-                // height.addEventListener('wheel', (w)=>{
-                //     w.deltaY>0 ? ++height.value: --height.value
-                //     height.value = +height.value
-                // })
-
-                // var spans = document.getElementsByTagName('span')
                 function setShadow(on){
                     directLight.intensity  = +on;
                     ambientLight.intensity =+!on +.1;
@@ -167,12 +196,12 @@
                 // var renderer = new THREE.WebGLRenderer(container);
                 renderer.setSize( window.innerWidth, window.innerHeight );
                 // document.body.appendChild( renderer.domElement );
-                var controls = new THREE.OrbitControls( camera, renderer.domElement );
-                controls.maxDistance = 12;
-                controls.minDistance = 6;
-                controls.maxPolarAngle = Math.PI/8*7; 
-                controls.minPolarAngle = Math.PI/8; 
-                controls.enablePan = false
+                var orbits = new THREE.OrbitControls( camera, renderer.domElement );
+                orbits.maxDistance = 12;
+                orbits.minDistance = 6;
+                // orbits.maxPolarAngle = Math.PI/8*7; 
+                // orbits.minPolarAngle = Math.PI/8; 
+                orbits.enablePan = false
                 var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
                 var ambientLight    = new THREE.AmbientLight( 0xcccccc, .1)
                 directLight.position.set(5,3,5)
@@ -222,17 +251,17 @@
                 //     xhttp.send();
                 // }
                 function playMaps(){
-                    let next = +play_fn.slice(-2)
+                    let next = +currentTmpt.slice(-2)
                     next += 16
                     if(next>63){
                         next %= 16
-                        play_fn = play_fn.replace(/(\d\d)00_t/, function(s, a){
+                        currentTmpt = currentTmpt.replace(/(\d\d)00_t/, function(s, a){
                             a = +a + 1
                             return setz(a, 2) + '00_t'
                         })
-                        setMap(play_fn.slice(0,-2)+setz(next, 2), playMaps)
+                        setMap(currentTmpt.slice(0,-2)+setz(next, 2), playMaps)
                     }else{
-                        setMap(play_fn.slice(0,-2)+next, playMaps)
+                        setMap(currentTmpt.slice(0,-2)+next, playMaps)
                     }
                 }
                 
@@ -260,7 +289,7 @@
                     hour: 0,
                     height: 0,
                     playInterval: 1000,
-                    rotationSpeed: 2,
+                    rotationSpeed: 0,
                     shadow: true
                 }
                 function update(){
@@ -287,7 +316,7 @@
                 function setMap(fname, cb){
                     function _setMap(t){
                         materialShell.map = t;
-                        play_fn = fname;
+                        currentTmpt = fname;
                         label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
                             return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`
                         });
