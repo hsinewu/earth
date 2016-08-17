@@ -134,13 +134,20 @@
                 theta = theta * Math.PI / 180
                 phi = phi * Math.PI / 180
                 return {
-                    // xyz in math => zxy in CG
-                    z: radius * Math.sin(phi) * Math.cos(theta),
-                    x: radius * Math.sin(phi) * Math.sin(theta),
-                    y: radius * Math.cos(phi)
+                    x: radius * Math.sin(phi) * Math.cos(theta),
+                    y: radius * Math.sin(phi) * Math.sin(theta),
+                    z: radius * Math.cos(phi)
                 }
             }
 
+            function xyzToSphere(x, y, z){
+                // TODO: boundary test
+                return {
+                    r: Math.sqrt( x*x + y*y + z*z),
+                    t: Math.atan( y/x)/ Math.PI*180 || 0, // ???
+                    p: Math.atan( Math.sqrt( x*x + y*y)/ z)/ Math.PI*180
+                }
+            }
             window.onload = function(){
                 // This should be removed later
                 setShadow(0)
@@ -163,15 +170,30 @@
                 function setGeoCam( lat, lng){
                     setSphereCam( lng+90, 90-lat);
                 }
-                function setSphereCam( theta, rho){
-                    var tar = sphereToXyz(8, theta, rho)
-                    tween = new TWEEN.Tween(camera.position).to(tar, 500)
+                // #########################################################
+                function setSphereCam( theta, phi){
+                    // var tar = sphereToXyz(8, theta, phi)
+                    // var tween = new TWEEN.Tween(camera.position).to({
+                    //     // xyz in math => zxy in CG
+                    //     z: tar.x, x: tar.y, y: tar.z
+                    // }, 500)
+                    // .onUpdate(function() {
+                    //     camera.lookAt( new THREE.Vector3(0,0,0));
+                    // }).start();
+
+                    var start = xyzToSphere(camera.position.z, camera.position.x, camera.position.y)
+
+                    var tween = new TWEEN.Tween(start).to({
+                        t: theta, p: phi
+                    }, 500)
                     .onUpdate(function() {
-                        camera.lookAt( new THREE.Vector3(0,0,0));
-                    }).onComplete(function() {
+                        var point = sphereToXyz(start.r, start.t, start.p)
+                        camera.position.set( point.y, point.z, point.x);
                         camera.lookAt( new THREE.Vector3(0,0,0));
                     }).start();
-                    // camera.position.set(tar.x, tar.y, tar.z);
+                    
+                    // var point = sphereToXyz(start.r, theta, phi)
+                    // camera.position.set( point.y, point.z, point.x);
                     // camera.lookAt( new THREE.Vector3(0,0,0));
                 }
 
