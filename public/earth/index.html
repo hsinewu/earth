@@ -51,7 +51,7 @@
                 justify-content: space-around;  
                 flex-direction: column;
                 width: 150px;
-                height: 150px;
+                height: 200px;
                 background-color: #fff;
                 top: 10px;
                 left: 10px;
@@ -68,8 +68,13 @@
             <!-- <div id="pause-button" onclick="clearTimeout(play_id);tog();" hidden></div> -->
         </div>
         <div id="area-panel">
-            <span onclick="setSphereCam(70, 40)">East Aisa</span>
-            <span onclick="setSphereCam(280, -50)">North America</span>
+            <span onclick="setGeoCam(25, 115)">East Aisa</span>
+            <span onclick="setGeoCam(45, -100)">North America</span>
+            <span onclick="setGeoCam(-10, -60)">South America</span>
+            <span onclick="setGeoCam(50, 5)">Europe</span>
+            <!-- <span onclick="setGeoCam(45, -100)">Tropics</span> -->
+            <span onclick="setGeoCam(15, 15)">Africa</span>
+            <span onclick="setGeoCam(-25, 135)">Australia</span>
         </div>
         <div id="t">
             <div id="t-legend">
@@ -125,18 +130,19 @@
             }
 
             // angles in degrees
-            function sphereToXyz(radius, theta, rho){
+            function sphereToXyz(radius, theta, phi){
                 theta = theta * Math.PI / 180
-                rho = rho * Math.PI / 180
-                return [
-                    radius * Math.sin(rho) * Math.cos(theta),
-                    radius * Math.sin(rho) * Math.sin(theta),
-                    radius * Math.cos(rho)
-                ]
+                phi = phi * Math.PI / 180
+                return {
+                    // xyz in math => zxy in CG
+                    z: radius * Math.sin(phi) * Math.cos(theta),
+                    x: radius * Math.sin(phi) * Math.sin(theta),
+                    y: radius * Math.cos(phi)
+                }
             }
 
             window.onload = function(){
-                // This should removed later
+                // This should be removed later
                 setShadow(0)
             }
         </script>
@@ -154,18 +160,19 @@
                         pause.style = ''
                     }
                 }
+                function setGeoCam( lat, lng){
+                    setSphereCam( lng+90, 90-lat);
+                }
                 function setSphereCam( theta, rho){
                     var tar = sphereToXyz(8, theta, rho)
-                    // tween = new TWEEN.Tween(camera.position).to(tar, 1000).onUpdate(function() {
-                    //     console.log("幹你娘")
-                    //     camera.position.set( ...tar);
-                    //     camera.lookAt( new THREE.Vector3(0,0,0));
-                    // }).onComplete(function() {
-                    //     camera.position.set( ...tar);
-                    //     camera.lookAt( new THREE.Vector3(0,0,0));
-                    // }).start();
-                    camera.position.set( ...tar);
-                    camera.lookAt( new THREE.Vector3(0,0,0));
+                    tween = new TWEEN.Tween(camera.position).to(tar, 500)
+                    .onUpdate(function() {
+                        camera.lookAt( new THREE.Vector3(0,0,0));
+                    }).onComplete(function() {
+                        camera.lookAt( new THREE.Vector3(0,0,0));
+                    }).start();
+                    // camera.position.set(tar.x, tar.y, tar.z);
+                    // camera.lookAt( new THREE.Vector3(0,0,0));
                 }
 
                 function setShadow(on){
@@ -236,6 +243,7 @@
                     shellMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
 
                     renderer.render(scene, camera);
+                    TWEEN.update()
                 };
 
                 animate();
