@@ -147,228 +147,187 @@
                     p: Math.acos( z/ Math.hypot( x, y, z))/ Math.PI*180
                 }
             }
-            window.onload = function(){
-                // This should be removed later
-                setShadow(0)
-            }
         </script>
         <script>
-            // function initMain(){
-                var play = document.getElementById('play-button')
-                var pause = document.getElementById('pause-button')
-                var play_id, currentTmpt='200908.0100_t_001';
-                function tog(isPlay){
-                    if(isPlay){
-                        play.style = ''
-                        pause.style = 'display: none'
-                    }else{
-                        play.style = 'display: none'
-                        pause.style = ''
-                    }
+            var play = document.getElementById('play-button')
+            var pause = document.getElementById('pause-button')
+            var play_id, currentTmpt='200908.0100_t_001';
+            function tog(isPlay){
+                if(isPlay){
+                    play.style = ''
+                    pause.style = 'display: none'
+                }else{
+                    play.style = 'display: none'
+                    pause.style = ''
                 }
+            }
 
-                function setGeoCam( lat, lng){
-                    setSphereCam( lng+90, 90-lat);
-                }
+            function setGeoCam( lat, lng){
+                setSphereCam( lng+90, 90-lat);
+            }
 
-                function setSphereCam( theta, phi){
+            function setSphereCam( theta, phi){
 
-                    var start = cart2sph(camera.position.z, camera.position.x, camera.position.y)
-                    console.log(start)
-                    var tween = new TWEEN.Tween(start).to({
-                        t: theta, p: phi
-                    }, 500)
-                    .onUpdate(function() {
-                        var point = sph2cart(start.r, start.t, start.p)
-                        camera.position.set( point.y, point.z, point.x);
-                        camera.lookAt( new THREE.Vector3(0,0,0));
-                    }).start();
-                    
-                }
-
-                function setShadow(on){
-                    directLight.intensity  = +on;
-                    ambientLight.intensity =+!on +.1;
-                    // spans[+!on].className = "on"
-                    // spans[ +on].className = ""
-                }
-
-                var label = document.getElementById('label')
-                label.addEventListener('mouseenter', (m)=>{
-                    label.classList.add('hover')
-                })
-                label.addEventListener('mouseleave', (m)=>{
-                    label.classList.remove('hover')
-                })
-
-                var container = document.getElementById('container')
-                var loader = new THREE.TextureLoader();
-                var maps={}, itemN = 0
+                var start = cart2sph(camera.position.z, camera.position.x, camera.position.y)
+                console.log(start)
+                var tween = new TWEEN.Tween(start).to({
+                    r: 8, t: theta, p: phi
+                }, 500)
+                .onUpdate(function() {
+                    var point = sph2cart(start.r, start.t, start.p)
+                    camera.position.set( point.y, point.z, point.x);
+                    camera.lookAt( new THREE.Vector3(0,0,0));
+                }).start();
                 
-                // init
-                var scene = new THREE.Scene();
-                var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+            }
 
-                var renderer = new THREE.WebGLRenderer();
-                container.appendChild(renderer.domElement)
-                // var renderer = new THREE.WebGLRenderer(container);
-                renderer.setSize( window.innerWidth, window.innerHeight );
-                // document.body.appendChild( renderer.domElement );
-                var orbits = new THREE.OrbitControls( camera, renderer.domElement );
-                orbits.maxDistance = 12;
-                orbits.minDistance = 6;
-                // orbits.maxPolarAngle = Math.PI/8*7; 
-                // orbits.minPolarAngle = Math.PI/8; 
-                orbits.enablePan = false
-                var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
-                var ambientLight    = new THREE.AmbientLight( 0xcccccc, .1)
-                directLight.position.set(5,3,5)
-                scene.add( directLight )
-                scene.add( ambientLight )
-                // earth
-                var geometry = new THREE.SphereGeometry(5, 32, 32)
-                var material = new THREE.MeshPhongMaterial()
-                material.map = THREE.ImageUtils.loadTexture('textures/earthmap1k.jpg')
-                material.bumpMap = THREE.ImageUtils.loadTexture('textures/earthbump1k.jpg')
-                material.bumpScale = 0.1
-                material.specularMap    = THREE.ImageUtils.loadTexture('textures/earthspec1k.jpg')
-                loader.load('textures/earthmap4k.jpg', (t)=>material.map=t)
-                loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t)
-                var earthMesh = new THREE.Mesh(geometry, material)
-                scene.add(earthMesh)
-                // shell
-                var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
-                var materialShell = new THREE.MeshBasicMaterial()
-                materialShell.map = THREE.ImageUtils.loadTexture('images2/200908.0100_t_016.png')
-                materialShell.transparent = true
-                var shellMesh = new THREE.Mesh(geometryShell, materialShell)
-                scene.add(shellMesh)
+            function setShadow(on){
+                directLight.intensity  = +on;
+                ambientLight.intensity =+!on +.1;
+            }
 
-                camera.position.z = 12;
+            var label = document.getElementById('label')
+            label.addEventListener('mouseenter', (m)=>{
+                label.classList.add('hover')
+            })
+            label.addEventListener('mouseleave', (m)=>{
+                label.classList.remove('hover')
+            })
 
-                var tmpt
-                var animate = function () {
-                    requestAnimationFrame( animate );
+            var container = document.getElementById('container')
+            var loader = new THREE.TextureLoader();
+            var maps={}, itemN = 0
+            
+            // init
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
-                    earthMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
-                    shellMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
+            var renderer = new THREE.WebGLRenderer();
+            container.appendChild(renderer.domElement)
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            var orbits = new THREE.OrbitControls( camera, renderer.domElement );
+            orbits.maxDistance = 12;
+            orbits.minDistance = 6;
+            orbits.enablePan = false
+            var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
+            var ambientLight    = new THREE.AmbientLight( 0xcccccc, .1)
+            directLight.position.set(5,3,5)
+            scene.add( directLight )
+            scene.add( ambientLight )
+            // earth
+            var geometry = new THREE.SphereGeometry(5, 32, 32)
+            var material = new THREE.MeshPhongMaterial()
+            material.map = THREE.ImageUtils.loadTexture('textures/earthmap1k.jpg')
+            material.bumpMap = THREE.ImageUtils.loadTexture('textures/earthbump1k.jpg')
+            material.bumpScale = 0.1
+            material.specularMap    = THREE.ImageUtils.loadTexture('textures/earthspec1k.jpg')
+            loader.load('textures/earthmap4k.jpg', (t)=>material.map=t)
+            loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t)
+            var earthMesh = new THREE.Mesh(geometry, material)
+            scene.add(earthMesh)
+            // shell
+            var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
+            var materialShell = new THREE.MeshBasicMaterial()
+            materialShell.map = THREE.ImageUtils.loadTexture('images2/200908.0100_t_016.png')
+            materialShell.transparent = true
+            var shellMesh = new THREE.Mesh(geometryShell, materialShell)
+            scene.add(shellMesh)
 
-                    renderer.render(scene, camera);
-                    TWEEN.update()
-                };
+            camera.position.z = 12;
 
-                animate();
+            var tmpt
+            var animate = function () {
+                requestAnimationFrame( animate );
 
-                // function get(path, cb) {
-                //     var xhttp = new XMLHttpRequest();
-                //     xhttp.onreadystatechange = function() {
-                //         if (xhttp.readyState == 4 && xhttp.status == 200) {
-                //             cb(xhttp.responseText)
-                //         }
-                //     };
-                //     xhttp.open("GET", path, true);
-                //     xhttp.send();
-                // }
-                function playMaps(){
-                    let next = +currentTmpt.slice(-2)
-                    next += 16
-                    if(next>63){
-                        next %= 16
-                        currentTmpt = currentTmpt.replace(/(\d\d)00_t/, function(s, a){
-                            a = +a + 1
-                            return setz(a, 2) + '00_t'
-                        })
-                        setMap(currentTmpt.slice(0,-2)+setz(next, 2), playMaps)
-                    }else{
-                        setMap(currentTmpt.slice(0,-2)+next, playMaps)
-                    }
+                earthMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
+                shellMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
+
+                renderer.render(scene, camera);
+                TWEEN.update()
+            };
+
+            animate();
+
+            function playMaps(){
+                let next = +currentTmpt.slice(-2)
+                next += 16
+                if(next>63){
+                    next %= 16
+                    currentTmpt = currentTmpt.replace(/(\d\d)00_t/, function(s, a){
+                        a = +a + 1
+                        return setz(a, 2) + '00_t'
+                    })
+                    setMap(currentTmpt.slice(0,-2)+setz(next, 2), playMaps)
+                }else{
+                    setMap(currentTmpt.slice(0,-2)+next, playMaps)
                 }
-                
-                // function getUrl(){
-                //     let date = document.getElementById('date')
-                //     let height = document.getElementById('height')
-                //     let time = document.getElementById('time')
-                //     let url = toTmptUrl(...date.value.split('/').map(Number), 't', +time.value, +height.value)
-                //     return url
-                // }
-                
-            // }
-            // window.onload = function() {
-            //     initMain()
-            //     initTmpt()
-            // }
+            }
         </script>
         <script src="js/dat.gui.min.js"></script>
         <script>
-            // function initTmpt(){
-                tmpt = {
-                    year: 2009,
-                    month: 8,
-                    day: 2,
-                    hour: 0,
-                    height: 0,
-                    playInterval: 1000,
-                    rotationSpeed: 0,
-                    shadow: true
-                }
-                function update(){
-                    // alert(toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
-                    setMap(toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
-                }
-                var gui = new dat.GUI();
-                var tgui = gui.addFolder('Temparature')
-                // tgui.remember()
-                tgui.add(tmpt, 'year', [2009]).onChange(update);
-                tgui.add(tmpt, 'month', [8]).onChange(update);
-                tgui.add(tmpt, 'day', [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]).onChange(update);
-                tgui.add(tmpt, 'hour', {
-                    '0:00': 0, '6:00': 1, '12:00': 2, '18:00': 3
-                }).onChange(update);
-                tgui.add(tmpt, 'height', {
-                "10": 0, "30": 1, "50": 2, "70": 3, "100": 4, "150": 5, "200": 6, "250": 7, "300": 8, "400": 9, "500": 10, "600": 11, "700": 12, "850":   13, "925": 14, "1000": 15
-                }).onChange(update);
-                tgui.add(tmpt, 'playInterval', 100, 5000);
-                tgui.add(tmpt, 'rotationSpeed', 0, 100).step(1);
-                tgui.add(tmpt, 'shadow').onChange(setShadow);
-                tgui.open();
-                // fname: no .png posfix
-                function setMap(fname, cb){
-                    function _setMap(t){
-                        materialShell.map = t;
-                        currentTmpt = fname;
-                        label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
-                            return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`
-                        });
-                        // label.innerText = tmpt.year + '/' + tmpt.month + '/' + tmpt.day
-                        label.classList.add('hover')
-                        setTimeout(()=>{label.classList.remove('hover')}, 100)
-                        if(cb) {play_id = setTimeout(cb, tmpt.playInterval);}
-                    }
-                    if(fname in maps){
-                        _setMap( maps[fname])
-                    }else{
-                        let url = 'images2/'+fname+'.png'
-                        // maps[fname] = THREE.ImageUtils.loadTexture(url)
-                        // console.log('loading '+fname)
-                        loader.load(url, (texture)=>{
-                            _setMap( maps[fname]=texture)
-                        }, (xhr)=>{
-                            console.log( (xhr.loaded / xhr.total * 100) + '% loaded')
-                        }, (xhr)=>{
-                            // what the hell XDD
-                            if(cb) tog()
-                            else
-                            alert('404')
-                        })
-                    }
-                }
+            tmpt = {
+                year: 2009,
+                month: 8,
+                day: 2,
+                hour: 0,
+                height: 0,
+                playInterval: 1000,
+                rotationSpeed: 0,
+                shadow: true
+            }
+            function update(){
+                setMap(toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
+            }
+            var gui = new dat.GUI();
+            var tgui = gui.addFolder('Temparature')
+            tgui.add(tmpt, 'year', [2009]).onChange(update);
+            tgui.add(tmpt, 'month', [8]).onChange(update);
+            tgui.add(tmpt, 'day', [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]).onChange(update);
+            tgui.add(tmpt, 'hour', {
+                '0:00': 0, '6:00': 1, '12:00': 2, '18:00': 3
+            }).onChange(update);
+            tgui.add(tmpt, 'height', {
+            "10": 0, "30": 1, "50": 2, "70": 3, "100": 4, "150": 5, "200": 6, "250": 7, "300": 8, "400": 9, "500": 10, "600": 11, "700": 12, "850":   13, "925": 14, "1000": 15
+            }).onChange(update);
+            tgui.add(tmpt, 'playInterval', 100, 5000);
+            tgui.add(tmpt, 'rotationSpeed', 0, 100).step(1);
+            tgui.add(tmpt, 'shadow').onChange(setShadow);
+            tgui.open();
 
-                function toTmptUrl(y, m, d, t, h){
-                    y=+y; m=+m; d=+d; t=+t; h=+h;
-                    let serial = t*16+h
-                    return `${y}${setz(m, 2)}.${setz(d, 2)}00_t_${setz(serial, 3)}`
+            // fname: no .png posfix
+            function setMap(fname, cb){
+                function _setMap(t){
+                    materialShell.map = t;
+                    currentTmpt = fname;
+                    label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
+                        return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`
+                    });
+                    label.classList.add('hover')
+                    setTimeout(()=>{label.classList.remove('hover')}, 100)
+                    if(cb) {play_id = setTimeout(cb, tmpt.playInterval);}
                 }
-            // }
+                if(fname in maps){
+                    _setMap( maps[fname])
+                }else{
+                    let url = 'images2/'+fname+'.png'
+                    loader.load(url, (texture)=>{
+                        _setMap( maps[fname]=texture)
+                    }, (xhr)=>{
+                        console.log( (xhr.loaded / xhr.total * 100) + '% loaded')
+                    }, (xhr)=>{
+                        // what the hell XDD
+                        if(cb) tog()
+                        else
+                        alert('404')
+                    })
+                }
+            }
+
+            function toTmptUrl(y, m, d, t, h){
+                y=+y; m=+m; d=+d; t=+t; h=+h;
+                let serial = t*16+h
+                return `${y}${setz(m, 2)}.${setz(d, 2)}00_t_${setz(serial, 3)}`
+            }
         </script>
     </body>
 </html>
