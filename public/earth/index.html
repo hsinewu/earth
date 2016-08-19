@@ -13,18 +13,16 @@
             #label{
                 width: 30%;
                 height: 40px;
-                opacity: 0;
+                opacity: .6;
                 left: 35%;
                 font-size: 32px;
                 background-color: #666;
                 position: absolute;
                 bottom: 100px;
-                transition: opacity 1.5s;
                 text-align: center;
             }
-            #label.hover{
-                transition-property: none;
-                opacity: .9;
+            #label:hover{
+                opacity: 1;
             }
             #menu:hover{
                 height: 300px;
@@ -176,14 +174,6 @@
                 ambientLight.intensity =+!on +.1;
             }
 
-            var label = document.getElementById('label')
-            label.addEventListener('mouseenter', (m)=>{
-                label.classList.add('hover')
-            })
-            label.addEventListener('mouseleave', (m)=>{
-                label.classList.remove('hover')
-            })
-
             var container = document.getElementById('container')
             var loader = new THREE.TextureLoader();
             var maps={}, itemN = 0
@@ -292,8 +282,6 @@
                     label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
                         return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`
                     });
-                    label.classList.add('hover')
-                    setTimeout(()=>{label.classList.remove('hover')}, 100)
                     if(cb) {play_id = setTimeout(cb, tmpt.playInterval);}
                 }
                 if(fname in maps){
