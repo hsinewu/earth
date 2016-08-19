@@ -161,10 +161,14 @@
             var renderer = new THREE.WebGLRenderer();
             container.appendChild(renderer.domElement)
             renderer.setSize( window.innerWidth, window.innerHeight );
+
             var orbits = new THREE.OrbitControls( camera, renderer.domElement );
             orbits.maxDistance = 12;
             orbits.minDistance = 6;
             orbits.enablePan = false
+            orbits.autoRotate = true
+            orbits.autoRotateSpeed = 1
+
             var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
             var ambientLight    = new THREE.AmbientLight( 0xcccccc, .1)
             directLight.position.set(5,3,5)
@@ -195,11 +199,9 @@
             var animate = function () {
                 requestAnimationFrame( animate );
 
-                earthMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
-                shellMesh.rotation.y += tmpt ? tmpt.rotationSpeed/1000 : 0.002;
-
                 renderer.render(scene, camera);
                 TWEEN.update()
+                orbits.update()
             };
 
             animate();
@@ -228,7 +230,7 @@
                 hour: 0,
                 height: 0,
                 playInterval: 1000,
-                rotationSpeed: 0,
+                rotationSpeed: 1,
                 shadow: true
             }
             function update(){
@@ -246,7 +248,7 @@
             "10": 0, "30": 1, "50": 2, "70": 3, "100": 4, "150": 5, "200": 6, "250": 7, "300": 8, "400": 9, "500": 10, "600": 11, "700": 12, "850":   13, "925": 14, "1000": 15
             }).onChange(update);
             tgui.add(tmpt, 'playInterval', 100, 5000);
-            tgui.add(tmpt, 'rotationSpeed', 0, 100).step(1);
+            tgui.add(tmpt, 'rotationSpeed', 0, 100).step(1).onChange( ()=>orbits.autoRotateSpeed=tmpt.rotationSpeed);
             tgui.add(tmpt, 'shadow').onChange(setShadow);
             tgui.open();
 
