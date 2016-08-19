@@ -2,14 +2,13 @@
     <head>
         <title>🌎</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        
         <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
         <script>if(!document.querySelector('link[href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"]').length)document.write('<link rel="stylesheet" href="css/font-awesome.min.css">')</script>
-        <!-- <link rel="stylesheet" href="css/font-awesome.min.css"> -->
+        
         <link rel="stylesheet" href="css/temperature.css">
         <style>
             body { margin: 0; }
-            /*canvas { width: 100%; height: 100% }*/
-            /*#container { width: 100%; height: 100% }*/
             #label{
                 width: 30%;
                 height: 40px;
@@ -42,9 +41,6 @@
             #play-button, #pause-button {
                 color: #fff;
             }
-            /*span.on{
-                background-color: #888;
-            }*/
             #area-panel{
                 position: absolute;
                 display: flex;
@@ -64,15 +60,12 @@
         <div id="player">
             <i id="play-button" class="fa fa-play fa-3x" onclick="tog();playMaps();"></i>
             <i id="pause-button" class="fa fa-pause fa-3x" style="display: none" onclick="tog(1);clearTimeout(play_id);"></i>
-            <!-- <div id="play-button" onclick="tog();playMaps()"></div> -->
-            <!-- <div id="pause-button" onclick="clearTimeout(play_id);tog();" hidden></div> -->
         </div>
         <div id="area-panel">
             <span onclick="setGeoCam(25, 115)">East Aisa</span>
             <span onclick="setGeoCam(45, -100)">North America</span>
             <span onclick="setGeoCam(-10, -60)">South America</span>
             <span onclick="setGeoCam(50, 5)">Europe</span>
-            <!-- <span onclick="setGeoCam(45, -100)">Tropics</span> -->
             <span onclick="setGeoCam(15, 15)">Africa</span>
             <span onclick="setGeoCam(-25, 135)">Australia</span>
         </div>
@@ -112,11 +105,7 @@
                 </div>
             </div> -->
         </div>
-        <!-- <script src="jquery-3.0.0.min.js"></script> -->
-        <!-- <script src="jquery-2.1.4.js"></script> -->
         <script src="js/Tween.js"></script>
-        <!-- <script src="js/tweenjs.min.js"></script> -->
-        <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/tweenjs/0.6.1/tweenjs.min.js"></script> -->
         <script scr="//cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script><script>window.THREE||document.write('<script src="js/three.min.js"><\/script>');</script>
         <script src="js/OrbitControls.js"></script>
         <script>
