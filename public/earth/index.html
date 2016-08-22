@@ -20,6 +20,7 @@
                 position: absolute;
                 bottom: 100px;
                 text-align: center;
+                border-radius: 5px;
             }
             #label:hover{
                 opacity: 1;
@@ -51,11 +52,21 @@
                 top: 10px;
                 left: 10px;
             }
+            #progress-bar{
+                height: 12px;
+                width: 40%;
+                position: absolute;
+                bottom: 30px;
+                left: 30%;
+                border-radius: 6px;
+                background: linear-gradient( to right, #fff, 1%, #777, 1%, #777);
+            }
         </style>
     </head>
     <body>
         <div id="container"></div>
         <div id="label">2016/8/9</div>
+        <div id="progress-bar"></div>
         <div id="player">
             <i id="play-button" class="fa fa-play fa-3x" onclick="tog();playMaps();"></i>
             <i id="pause-button" class="fa fa-pause fa-3x" style="display: none" onclick="tog(1);clearTimeout(play_id);"></i>
@@ -85,7 +96,7 @@
         <script src="js/OrbitControls.js"></script>
         <script>
             // utils
-            function setz(num, width){
+            function fillz(num, width){
                 num = +num;
                 num = num.toString();
                 while(num.length < width)
@@ -115,7 +126,7 @@
         <script>
             var play = document.getElementById('play-button')
             var pause = document.getElementById('pause-button')
-            var play_id, currentTmpt='200908.0100_t_001';
+            var play_id, currentMap='200908.0100_t_001';
             function tog(isPlay){
                 if(isPlay){
                     play.style = ''
@@ -124,6 +135,12 @@
                     play.style = 'display: none'
                     pause.style = ''
                 }
+            }
+
+            var bar = document.getElementById('progress-bar')
+            function setProgress( fraction){
+                var percent = parseInt( fraction*100) + '%'
+                bar.style = `background: linear-gradient( to right, #fff, ${percent}, #777, ${percent}, #777);`
             }
 
             function setGeoCam( lat, lng){
@@ -147,7 +164,7 @@
 
             function setShadow(on){
                 directLight.intensity  = +on;
-                ambientLight.intensity =+!on +.1;
+                ambientLight.intensity =+!on +.3;
             }
 
             var container = document.getElementById('container')
@@ -170,7 +187,7 @@
             orbits.autoRotateSpeed = 1
 
             var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
-            var ambientLight    = new THREE.AmbientLight( 0xcccccc, .1)
+            var ambientLight    = new THREE.AmbientLight( 0xcccccc, .3)
             directLight.position.set(5,3,5)
             scene.add( directLight )
             scene.add( ambientLight )
@@ -207,17 +224,17 @@
             animate();
 
             function playMaps(){
-                let next = +currentTmpt.slice(-2)
+                let next = +currentMap.slice(-2)
                 next += 16
                 if(next>63){
                     next %= 16
-                    currentTmpt = currentTmpt.replace(/(\d\d)00_t/, function(s, a){
+                    currentMap = currentMap.replace(/(\d\d)00_t/, function(s, a){
                         a = +a + 1
-                        return setz(a, 2) + '00_t'
+                        return fillz(a, 2) + '00_t'
                     })
-                    setMap(currentTmpt.slice(0,-2)+setz(next, 2), playMaps)
+                    setMap(currentMap.slice(0,-2)+fillz(next, 2), playMaps)
                 }else{
-                    setMap(currentTmpt.slice(0,-2)+next, playMaps)
+                    setMap(currentMap.slice(0,-2)+next, playMaps)
                 }
             }
         </script>
@@ -256,8 +273,11 @@
             function setMap(fname, cb){
                 function _setMap(t){
                     materialShell.map = t;
-                    currentTmpt = fname;
+                    currentMap = fname;
+
                     label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
+                        // 55 datetime in given test data
+                        setProgress( ((d-1)*4+ ~~(se/16))/ 55)   // lol
                         return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`
                     });
                     if(cb) {play_id = setTimeout(cb, tmpt.playInterval);}
@@ -282,7 +302,7 @@
             function toTmptUrl(y, m, d, t, h){
                 y=+y; m=+m; d=+d; t=+t; h=+h;
                 let serial = t*16+h
-                return `${y}${setz(m, 2)}.${setz(d, 2)}00_t_${setz(serial, 3)}`
+                return `${y}${fillz(m, 2)}.${fillz(d, 2)}00_t_${fillz(serial, 3)}`
             }
         </script>
     </body>
