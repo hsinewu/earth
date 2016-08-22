@@ -97,6 +97,7 @@
         <script>
             // utils
             function fillz(num, width){
+                
                 num = +num;
                 num = num.toString();
                 while(num.length < width)
@@ -106,6 +107,7 @@
 
             // angles in degrees
             function sph2cart(radius, theta, phi){
+
                 theta = theta * Math.PI / 180
                 phi = phi * Math.PI / 180
                 return {
@@ -116,6 +118,7 @@
             }
 
             function cart2sph(x, y, z){
+
                 return {
                     r: Math.hypot( x, y, z),
                     t: Math.atan2( y, x)/ Math.PI*180,
@@ -127,24 +130,26 @@
             var play = document.getElementById('play-button')
             var pause = document.getElementById('pause-button')
             var play_id, currentMap='200908.0100_t_001';
+
             function tog(isPlay){
-                if(isPlay){
-                    play.style = ''
-                    pause.style = 'display: none'
-                }else{
-                    play.style = 'display: none'
-                    pause.style = ''
-                }
+
+                play.style = isPlay? '': 'disPlay: none'
+                pause.style = !isPlay? '': 'display: none'
+
             }
 
             var bar = document.getElementById('progress-bar')
             function setProgress( fraction){
+
                 var percent = parseInt( fraction*100) + '%'
                 bar.style = `background: linear-gradient( to right, #fff, ${percent}, #777, ${percent}, #777);`
+
             }
 
             function setGeoCam( lat, lng){
+
                 setSphereCam( lng+90, 90-lat);
+
             }
 
             function setSphereCam( theta, phi){
@@ -163,8 +168,10 @@
             }
 
             function setShadow(on){
+
                 directLight.intensity  = +on;
                 ambientLight.intensity =+!on +.3;
+
             }
 
             var container = document.getElementById('container')
@@ -214,28 +221,38 @@
 
             var tmpt
             var animate = function () {
+
                 requestAnimationFrame( animate );
 
                 renderer.render(scene, camera);
                 TWEEN.update()
                 orbits.update()
+
             };
 
             animate();
 
             function playMaps(){
+
                 let next = +currentMap.slice(-2)
                 next += 16
+
                 if(next>63){
+
                     next %= 16
-                    currentMap = currentMap.replace(/(\d\d)00_t/, function(s, a){
+                    var nextMap = currentMap.replace(/(\d\d)00_t/, function(s, a){
                         a = +a + 1
                         return fillz(a, 2) + '00_t'
-                    })
-                    setMap(currentMap.slice(0,-2)+fillz(next, 2), playMaps)
+                    }).slice(0,-2) + fillz(next, 2)
+
                 }else{
-                    setMap(currentMap.slice(0,-2)+next, playMaps)
+
+                    var nextMap = currentMap.slice(0,-2) + next
+
                 }
+
+                setMap( nextMap, playMaps)
+
             }
         </script>
         <script src="js/dat.gui.min.js"></script>
@@ -251,7 +268,7 @@
                 shadow: true
             }
             function update(){
-                setMap(toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
+                setMap( toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
             }
             var gui = new dat.GUI();
             var tgui = gui.addFolder('Temparature')
@@ -271,38 +288,59 @@
 
             // fname: no .png posfix
             function setMap(fname, cb){
+
                 function _setMap(t){
+
                     materialShell.map = t;
                     currentMap = fname;
 
                     label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
+
                         // 55 datetime in given test data
                         setProgress( ((d-1)*4+ ~~(se/16))/ 55)   // lol
                         return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`
+
                     });
-                    if(cb) {play_id = setTimeout(cb, tmpt.playInterval);}
+
+                    if(cb) {
+                        play_id = setTimeout(cb, tmpt.playInterval);
+                    }
+
                 }
+
                 if(fname in maps){
+
                     _setMap( maps[fname])
+
                 }else{
+
                     let url = 'images2/'+fname+'.png'
                     loader.load(url, (texture)=>{
+
                         _setMap( maps[fname]=texture)
+
                     }, (xhr)=>{
+
                         console.log( (xhr.loaded / xhr.total * 100) + '% loaded')
+
                     }, (xhr)=>{
+
                         // what the hell XDD
                         if(cb) tog()
                         else
                         alert('404')
+
                     })
+
                 }
             }
 
             function toTmptUrl(y, m, d, t, h){
+
                 y=+y; m=+m; d=+d; t=+t; h=+h;
                 let serial = t*16+h
                 return `${y}${fillz(m, 2)}.${fillz(d, 2)}00_t_${fillz(serial, 3)}`
+
             }
         </script>
     </body>
