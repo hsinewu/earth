@@ -157,6 +157,22 @@
 
             }
 
+            bar.addEventListener( 'click', function(e) {
+
+                setPlay( (e.layerX+10)/ bar.clientWidth)
+
+            })
+
+            function setPlay( fraction) {
+
+                var n = Math.max( 1, Math.min( 55, Math.floor( fraction*55)))
+                ,   d = Math.floor( n/4) + 1
+                ,   t = (n)%4
+
+                setMap( toTmptUrl( tmpt.year, tmpt.month, d, t, tmpt.height))
+
+            }
+
             function setGeoCam( lat, lng){
 
                 setSphereCam( lng+90, 90-lat);
@@ -243,28 +259,29 @@
 
             animate();
 
-            function playMaps(){
+            function playMaps() {
 
-                let next = +currentMap.slice(-2)
+                let next = +currentMap.slice( -2)
                 next += 16
 
-                if(next>63){
+                if ( next > 63) {
 
                     next %= 16
-                    var nextMap = currentMap.replace(/(\d\d)00_t/, function(s, a){
+                    var nextMap = currentMap.replace(/(\d\d)00_t/, function(s, a) {
                         a = +a + 1
-                        return fillz(a, 2) + '00_t'
-                    }).slice(0,-2) + fillz(next, 2)
+                        return fillz( a, 2) + '00_t'
+                    }).slice( 0, -2) + fillz( next, 2)
 
-                }else{
+                } else {
 
-                    var nextMap = currentMap.slice(0,-2) + next
+                    var nextMap = currentMap.slice( 0, -2) + next
 
                 }
 
                 setMap( nextMap, playMaps)
 
             }
+
         </script>
         <script src="js/dat.gui.min.js"></script>
         <script>
@@ -279,7 +296,7 @@
                 shadow: true
             }
 
-            function update(){
+            function update() {
                 setMap( toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
             }
 
