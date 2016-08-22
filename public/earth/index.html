@@ -132,7 +132,7 @@
             var play_id, currentMap='200908.0100_t_001';
 
             function switchPlay(isPlayClicked){
-                
+
                 if (isPlayClicked) {
 
                     play.style = 'disPlay: none'
@@ -278,25 +278,43 @@
                 rotationSpeed: 1,
                 shadow: true
             }
+
             function update(){
                 setMap( toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
             }
+
             var gui = new dat.GUI();
             var tgui = gui.addFolder('Temparature')
-            tgui.add(tmpt, 'year', [2009]).onChange(update);
-            tgui.add(tmpt, 'month', [8]).onChange(update);
-            tgui.add(tmpt, 'day', [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]).onChange(update);
+            tgui.add(tmpt, 'year', [2009])
+                .onChange( update);
+
+            tgui.add(tmpt, 'month', [8])
+                .onChange( update);
+
+            tgui.add(tmpt, 'day', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+                .onChange( update);
+
             tgui.add(tmpt, 'hour', {
                 '0:00': 0, '6:00': 1, '12:00': 2, '18:00': 3
-            }).onChange(update);
+            }).onChange( update);
+
             tgui.add(tmpt, 'height', {
             "10": 0, "30": 1, "50": 2, "70": 3, "100": 4, "150": 5, "200": 6, "250": 7, "300": 8, "400": 9, "500": 10, "600": 11, "700": 12, "850":   13, "925": 14, "1000": 15
-            }).onChange(update);
-            tgui.add(tmpt, 'playInterval', 100, 5000);
-            tgui.add(tmpt, 'rotationSpeed', 0, 100).step(1).onChange( ()=>orbits.autoRotateSpeed=tmpt.rotationSpeed);
-            tgui.add(tmpt, 'shadow').onChange(setShadow);
-            tgui.open();
+            }).onChange( update);
 
+            tgui.add(tmpt, 'playInterval', 100, 5000);
+            tgui.add(tmpt, 'rotationSpeed', 0, 100)
+                .step(1)
+                .onChange( function() {
+                    orbits.autoRotateSpeed=tmpt.rotationSpeed
+                });
+
+            tgui.add(tmpt, 'shadow')
+                .onChange( setShadow);
+
+            tgui.open();
+        </script>
+        <script>
             // fname: no .png posfix
             function setMap(fname, cb){
 
@@ -318,6 +336,7 @@
                     }
 
                 }
+            
 
                 if(fname in maps){
 
