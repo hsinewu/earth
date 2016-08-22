@@ -96,70 +96,70 @@
         <script src="js/OrbitControls.js"></script>
         <script>
             // utils
-            function fillz(num, width){
+            function fillz(num, width) {
 
                 num = +num;
                 num = num.toString();
                 while(num.length < width)
-                    num = '0' + num
-                return num
+                    num = '0' + num;
+                return num;
             }
 
             // angles in degrees
-            function sph2cart(radius, theta, phi){
+            function sph2cart(radius, theta, phi) {
 
-                theta = theta * Math.PI / 180
-                phi = phi * Math.PI / 180
+                theta = theta * Math.PI / 180;
+                phi = phi * Math.PI / 180;
                 return {
                     x: radius * Math.sin(phi) * Math.cos(theta),
                     y: radius * Math.sin(phi) * Math.sin(theta),
                     z: radius * Math.cos(phi)
-                }
+                };
             }
 
-            function cart2sph(x, y, z){
+            function cart2sph(x, y, z) {
 
                 return {
                     r: Math.hypot( x, y, z),
                     t: Math.atan2( y, x)/ Math.PI*180,
                     p: Math.acos( z/ Math.hypot( x, y, z))/ Math.PI*180
-                }
+                };
             }
         </script>
         <script>
             var play = document.getElementById('play-button')
-            var pause = document.getElementById('pause-button')
-            var play_id, currentMap='200908.0100_t_001';
+            ,   pause = document.getElementById('pause-button')
+            ,   play_id, currentMap = '200908.0100_t_001';
 
-            function switchPlay(isPlayClicked){
+            function switchPlay(isPlayClicked) {
 
                 if (isPlayClicked) {
 
-                    play.style = 'disPlay: none'
-                    pause.style = ''
+                    play.style = 'disPlay: none';
+                    pause.style = '';
                     playMaps();
 
                 } else {
 
-                    play.style = ''
-                    pause.style = 'disPlay: none'
+                    play.style = '';
+                    pause.style = 'disPlay: none';
                     clearTimeout(play_id);
 
                 }
             }
 
 
-            var bar = document.getElementById('progress-bar')
-            function setProgress( fraction){
+            var bar = document.getElementById('progress-bar');
+            function setProgress( fraction) {
 
-                var percent = parseInt( fraction*100) + '%'
-                bar.style = `background: linear-gradient( to right, #fff, ${percent}, #777, ${percent}, #777);`
+                var percent = parseInt( fraction*100) + '%';
+                bar.style = `background: linear-gradient( to right, #fff, ${percent}, #777, ${percent}, #777);`;
 
             }
 
             bar.addEventListener( 'click', function(e) {
 
-                setPlay( (e.layerX+10)/ bar.clientWidth)
+                setPlay( (e.layerX+10)/ bar.clientWidth);
 
             })
 
@@ -167,34 +167,33 @@
 
                 var n = Math.max( 1, Math.min( 55, Math.floor( fraction*55)))
                 ,   d = Math.floor( n/4) + 1
-                ,   t = (n)%4
+                ,   t = n%4;
 
-                setMap( toTmptUrl( tmpt.year, tmpt.month, d, t, tmpt.height))
+                setMap( toTmptUrl( tmpt.year, tmpt.month, d, t, tmpt.height));
 
             }
 
-            function setGeoCam( lat, lng){
+            function setGeoCam( lat, lng) {
 
                 setSphereCam( lng+90, 90-lat);
 
             }
 
-            function setSphereCam( theta, phi){
+            function setSphereCam( theta, phi) {
 
-                var start = cart2sph(camera.position.z, camera.position.x, camera.position.y)
-                console.log(start)
+                var start = cart2sph(camera.position.z, camera.position.x, camera.position.y);
                 var tween = new TWEEN.Tween(start).to({
                     r: 8, t: theta, p: phi
                 }, 500)
-                .onUpdate(function() {
-                    var point = sph2cart(start.r, start.t, start.p)
+                .onUpdate( function() {
+                    var point = sph2cart( start.r, start.t, start.p)
                     camera.position.set( point.y, point.z, point.x);
                     camera.lookAt( new THREE.Vector3(0,0,0));
                 }).start();
                 
             }
 
-            function setShadow(on){
+            function setShadow(on) {
 
                 directLight.intensity  = +on;
                 ambientLight.intensity =+!on +.3;
@@ -202,47 +201,47 @@
             }
 
             var container = document.getElementById('container')
-            var loader = new THREE.TextureLoader();
-            var maps={}, itemN = 0
+            ,   loader = new THREE.TextureLoader()
+            ,   maps={}, itemN = 0;
             
             // init
-            var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+            var scene = new THREE.Scene()
+            ,   camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 )
+            ,   renderer = new THREE.WebGLRenderer();
 
-            var renderer = new THREE.WebGLRenderer();
-            container.appendChild(renderer.domElement)
+            container.appendChild(renderer.domElement);
             renderer.setSize( window.innerWidth, window.innerHeight );
 
             var orbits = new THREE.OrbitControls( camera, renderer.domElement );
             orbits.maxDistance = 12;
             orbits.minDistance = 6;
-            orbits.enablePan = false
-            orbits.autoRotate = true
-            orbits.autoRotateSpeed = 1
+            orbits.enablePan = false;
+            orbits.autoRotate = true;
+            orbits.autoRotateSpeed = 1;
 
             var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
-            var ambientLight    = new THREE.AmbientLight( 0xcccccc, .3)
-            directLight.position.set(5,3,5)
-            scene.add( directLight )
-            scene.add( ambientLight )
+            ,   ambientLight = new THREE.AmbientLight( 0xcccccc, .3);
+            directLight.position.set(5,3,5);
+            scene.add( directLight );
+            scene.add( ambientLight );
             // earth
             var geometry = new THREE.SphereGeometry(5, 32, 32)
-            var material = new THREE.MeshPhongMaterial()
-            material.map = THREE.ImageUtils.loadTexture('textures/earthmap1k.jpg')
-            material.bumpMap = THREE.ImageUtils.loadTexture('textures/earthbump1k.jpg')
-            material.bumpScale = 0.1
-            material.specularMap    = THREE.ImageUtils.loadTexture('textures/earthspec1k.jpg')
-            loader.load('textures/earthmap4k.jpg', (t)=>material.map=t)
-            loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t)
-            var earthMesh = new THREE.Mesh(geometry, material)
-            scene.add(earthMesh)
+            ,   material = new THREE.MeshPhongMaterial();
+            material.map = THREE.ImageUtils.loadTexture('textures/earthmap1k.jpg');
+            material.bumpMap = THREE.ImageUtils.loadTexture('textures/earthbump1k.jpg');
+            material.bumpScale = 0.1;
+            material.specularMap = THREE.ImageUtils.loadTexture('textures/earthspec1k.jpg');
+            loader.load('textures/earthmap4k.jpg', (t)=>material.map=t);
+            loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t);
+            var earthMesh = new THREE.Mesh(geometry, material);
+            scene.add(earthMesh);
             // shell
             var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
-            var materialShell = new THREE.MeshBasicMaterial()
-            materialShell.map = THREE.ImageUtils.loadTexture('images2/200908.0100_t_016.png')
-            materialShell.transparent = true
-            var shellMesh = new THREE.Mesh(geometryShell, materialShell)
-            scene.add(shellMesh)
+            ,   materialShell = new THREE.MeshBasicMaterial();
+            materialShell.map = THREE.ImageUtils.loadTexture('images2/200908.0100_t_016.png');
+            materialShell.transparent = true;
+            var shellMesh = new THREE.Mesh(geometryShell, materialShell);
+            scene.add(shellMesh);
 
             camera.position.z = 12;
 
@@ -252,8 +251,8 @@
                 requestAnimationFrame( animate );
 
                 renderer.render(scene, camera);
-                TWEEN.update()
-                orbits.update()
+                TWEEN.update();
+                orbits.update();
 
             };
 
@@ -261,24 +260,24 @@
 
             function playMaps() {
 
-                let next = +currentMap.slice( -2)
-                next += 16
+                let next = +currentMap.slice( -2);
+                next += 16;
 
                 if ( next > 63) {
 
-                    next %= 16
+                    next %= 16;
                     var nextMap = currentMap.replace(/(\d\d)00_t/, function(s, a) {
-                        a = +a + 1
-                        return fillz( a, 2) + '00_t'
-                    }).slice( 0, -2) + fillz( next, 2)
+                        a = +a + 1;
+                        return fillz( a, 2) + '00_t';
+                    }).slice( 0, -2) + fillz( next, 2);
 
                 } else {
 
-                    var nextMap = currentMap.slice( 0, -2) + next
+                    var nextMap = currentMap.slice( 0, -2) + next;
 
                 }
 
-                setMap( nextMap, playMaps)
+                setMap( nextMap, playMaps);
 
             }
 
@@ -294,14 +293,15 @@
                 playInterval: 1000,
                 rotationSpeed: 1,
                 shadow: true
-            }
+            };
 
             function update() {
-                setMap( toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height))
+                setMap( toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height));
             }
 
-            var gui = new dat.GUI();
-            var tgui = gui.addFolder('Temparature')
+            var gui = new dat.GUI()
+            ,   tgui = gui.addFolder('Temparature');
+
             tgui.add(tmpt, 'year', [2009])
                 .onChange( update);
 
@@ -343,8 +343,8 @@
                     label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
 
                         // 55 datetime in given test data
-                        setProgress( ((d-1)*4+ ~~(se/16))/ 55)   // lol
-                        return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`
+                        setProgress( ((d-1)*4+ ~~(se/16))/ 55);   // lol
+                        return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`;
 
                     });
 
@@ -357,25 +357,25 @@
 
                 if(fname in maps){
 
-                    _setMap( maps[fname])
+                    _setMap( maps[fname]);
 
                 }else{
 
-                    let url = 'images2/'+fname+'.png'
+                    var url = 'images2/'+fname+'.png';
                     loader.load(url, (texture)=>{
 
-                        _setMap( maps[fname]=texture)
+                        _setMap( maps[fname]=texture);
 
                     }, (xhr)=>{
 
-                        console.log( (xhr.loaded / xhr.total * 100) + '% loaded')
+                        console.log( (xhr.loaded / xhr.total * 100) + '% loaded');
 
                     }, (xhr)=>{
 
-                        // what the hell XDD
-                        if(cb) tog()
+                        // TODO
+                        if(cb) /*tog()*/;   
                         else
-                        alert('404')
+                        alert('404');
 
                     })
 
@@ -385,8 +385,8 @@
             function toTmptUrl(y, m, d, t, h){
 
                 y=+y; m=+m; d=+d; t=+t; h=+h;
-                let serial = t*16+h
-                return `${y}${fillz(m, 2)}.${fillz(d, 2)}00_t_${fillz(serial, 3)}`
+                var serial = t*16+h;
+                return `${y}${fillz(m, 2)}.${fillz(d, 2)}00_t_${fillz(serial, 3)}`;
 
             }
         </script>
