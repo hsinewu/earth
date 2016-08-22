@@ -68,8 +68,8 @@
         <div id="label">2016/8/9</div>
         <div id="progress-bar"></div>
         <div id="player">
-            <i id="play-button" class="fa fa-play fa-3x" onclick="tog();playMaps();"></i>
-            <i id="pause-button" class="fa fa-pause fa-3x" style="display: none" onclick="tog(1);clearTimeout(play_id);"></i>
+            <i id="play-button" class="fa fa-play fa-3x" onclick="switchPlay(true)"></i>
+            <i id="pause-button" class="fa fa-pause fa-3x" style="display: none" onclick="switchPlay(false)"></i>
         </div>
         <div id="area-panel">
             <span onclick="setGeoCam(25, 115)">East Aisa</span>
@@ -97,7 +97,7 @@
         <script>
             // utils
             function fillz(num, width){
-                
+
                 num = +num;
                 num = num.toString();
                 while(num.length < width)
@@ -131,12 +131,23 @@
             var pause = document.getElementById('pause-button')
             var play_id, currentMap='200908.0100_t_001';
 
-            function tog(isPlay){
+            function switchPlay(isPlayClicked){
+                
+                if (isPlayClicked) {
 
-                play.style = isPlay? '': 'disPlay: none'
-                pause.style = !isPlay? '': 'display: none'
+                    play.style = 'disPlay: none'
+                    pause.style = ''
+                    playMaps();
 
+                } else {
+
+                    play.style = ''
+                    pause.style = 'disPlay: none'
+                    clearTimeout(play_id);
+
+                }
             }
+
 
             var bar = document.getElementById('progress-bar')
             function setProgress( fraction){
