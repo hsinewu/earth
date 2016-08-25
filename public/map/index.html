@@ -10,6 +10,9 @@
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script>
 
-/* JavaScript goes here. */
+d3.json( "uk.json", function(err ,uk) {
+	if (err) return console.log(err);
+	console.log(uk);
+})
 
 </script>
