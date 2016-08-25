@@ -20,8 +20,12 @@ d3.json( "uk.json", function(err ,uk) {
 	if (err) return console.log(err);
 
 	var subunits = topojson.feature( uk, uk.objects.subunits) // TopoJSON => GeoJSON?
-	var proj = d3.geo.mercator()
-
+	var proj = d3.geo.albers()
+			.center( [0, 55.4])
+			.rotate( [4.4, 0])
+			.parallels( [50, 60])
+			.scale(6000)
+			.translate( [width/2, height/2]);
 	var path = d3.geo.path()
 		.projection( proj)
 
