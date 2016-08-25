@@ -9,16 +9,25 @@
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script>
+var width = 960
+,	height = 1160;
 
 svg = d3.select("body").append("svg")
-	.attr('width', 960)
-	.attr('height', 1160);
+	.attr('width', width)
+	.attr('height', height);
 
 d3.json( "uk.json", function(err ,uk) {
 	if (err) return console.log(err);
+
+	var subunits = topojson.feature( uk, uk.objects.subunits) // TopoJSON => GeoJSON?
+	var proj = d3.geo.mercator()
+
+	var path = d3.geo.path()
+		.projection( proj)
+
 	svg.append("path")
-		.datum( topojson.feature( uk, uk.objects.subunits))
-		.attr("d", d3.geo.path().projection( d3.geo.mercator()))
+		.datum( subunits)
+		.attr("d", path)
 })
 
 </script>
