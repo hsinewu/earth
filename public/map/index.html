@@ -10,9 +10,15 @@
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script>
 
+svg = d3.select("body").append("svg")
+	.attr('width', 960)
+	.attr('height', 1160);
+
 d3.json( "uk.json", function(err ,uk) {
 	if (err) return console.log(err);
-	console.log(uk);
+	svg.append("path")
+		.datum( topojson.feature( uk, uk.objects.subunits))
+		.attr("d", d3.geo.path().projection( d3.geo.mercator()))
 })
 
 </script>
