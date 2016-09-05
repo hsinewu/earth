@@ -1,0 +1,6 @@
+# coding: utf-8
+import numpy as np
+from scipy.io.netcdf import netcdf_file
+f = netcdf_file('ph1.nc','r')
+data = f.variables['t']
+data.shape

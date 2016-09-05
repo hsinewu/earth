@@ -15,5 +15,5 @@ f.close()
 
 map = Basemap(resolution='l',lon_0=180)
 xx, yy = np.meshgrid(lons, lats)
-map.pcolormesh(xx, yy, np.squeeze(data))
-plt.savefig('_basic.png')
+map.contourf(xx, yy, np.squeeze(data))
+plt.savefig('_contour.png')
