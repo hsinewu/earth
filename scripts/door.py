@@ -3,7 +3,7 @@ import argparse
 argp = argparse.ArgumentParser()
 argp.add_argument( "time", help="specify the time of the day", type=int, choices=range(4))
 argp.add_argument( "height", help="specify the height level", type=int, choices=range(16))
-argp.add_argument( "kind", help="specify what kind of map to draw", choices=['pc', 'cnt', 'cntf'])
+argp.add_argument( "kind", help="specify what kind of map to draw", choices=['cnt', 'cntf', 'pc', 'qv', 'sp'])
 args = argp.parse_args()
 print(args)
 
@@ -17,20 +17,32 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 with netcdf_file('ph1.nc', 'r') as f:
-	lats = f.variables['lat'][:]
-	lons = f.variables['lon'][:]
-	data = f.variables['t'][args.time, args.height]
+	if args.kind in ['qv', 'sp']:
+		step = 32
+		lats = f.variables['lat'][::step]
+		lons = f.variables['lon'][::step]
+		u = f.variables['u'][0,0,::step,::step]
+		v = f.variables['v'][0,0,::step,::step]
+		speed = np.sqrt(u*u+v*v)
+	else:
+		lats = f.variables['lat'][:]
+		lons = f.variables['lon'][:]
+		data = f.variables['t'][args.time, args.height]
 
 fig = plt.figure(figsize=(15.36,7.68))
-map = Basemap(resolution='l',lon_0=180)
+map = Basemap(resolution='l',lon_0=179.9)
 xx, yy = np.meshgrid(lons, lats)
 
-if args.kind == 'pc':
-	map.pcolormesh(xx, yy, np.squeeze(data))
-elif args.kind == 'cnt':
+if args.kind == 'cnt':
 	map.contour(xx, yy, np.squeeze(data))
 elif args.kind == 'cntf':
 	map.contourf(xx, yy, np.squeeze(data))
+elif args.kind == 'pc':
+	map.pcolormesh(xx, yy, np.squeeze(data))
+elif args.kind == 'qv':
+	map.quiver(xx, yy, u, v, speed, cmap=plt.cm.autumn)
+elif args.kind == 'sp':
+	map.streamplot(xx, yy, u, v, color=speed, cmap=plt.cm.autumn, linewidth=0.5*speed)
 
 fig.tight_layout()
 fig.subplots_adjust(bottom = 0)
