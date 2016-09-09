@@ -30,19 +30,19 @@ with netcdf_file('ph1.nc', 'r') as f:
 		data = f.variables['t'][args.time, args.height]
 
 fig = plt.figure(figsize=(15.36,7.68))
-map = Basemap(resolution='l',lon_0=179.9)
+bmap = Basemap(resolution='l',lon_0=179.9)
 xx, yy = np.meshgrid(lons, lats)
 
 if args.kind == 'cnt':
-	map.contour(xx, yy, np.squeeze(data))
+	bmap.contour(xx, yy, np.squeeze(data))
 elif args.kind == 'cntf':
-	map.contourf(xx, yy, np.squeeze(data))
+	bmap.contourf(xx, yy, np.squeeze(data))
 elif args.kind == 'pc':
-	map.pcolormesh(xx, yy, np.squeeze(data))
+	bmap.pcolormesh(xx, yy, np.squeeze(data))
 elif args.kind == 'qv':
-	map.quiver(xx, yy, u, v, speed, cmap=plt.cm.autumn)
+	bmap.quiver(xx, yy, u, v, speed, cmap=plt.cm.autumn)
 elif args.kind == 'sp':
-	map.streamplot(xx, yy, u, v, color=speed, cmap=plt.cm.autumn, linewidth=0.5*speed)
+	bmap.streamplot(xx, yy, u, v, color=speed, cmap=plt.cm.autumn, linewidth=0.5*speed)
 
 fig.tight_layout()
 fig.subplots_adjust(bottom = 0)
