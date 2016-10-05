@@ -15,11 +15,29 @@
         {
             /*margin: 0px;*/
         }
-
+        #area-panel{
+            position: absolute;
+            display: flex;
+            justify-content: space-around;  
+            flex-direction: column;
+            width: 150px;
+            height: 200px;
+            color: #fff;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
-
+<div id="area-panel">
+    <span onclick="">East Aisa</span>
+    <span onclick="">North America</span>
+    <span onclick="">South America</span>
+    <span onclick="">Europe</span>
+    <span onclick="">Africa</span>
+    <span onclick="">Australia</span>
+</div>
 <x3d>
     <scene>
 
