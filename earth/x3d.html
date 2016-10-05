@@ -35,13 +35,14 @@
     <span onclick="">North America</span>
     <span onclick="">South America</span>
     <span onclick="">Europe</span>
-    <span onclick="">Africa</span>
+    <span onclick="document.getElementById('africa').setAttribute('set_bind','true');">Africa</span>
     <span onclick="">Australia</span>
 </div>
 <x3d>
     <scene>
         <navigationInfo type='turntable'></navigationInfo>
-
+        <ViewPoint></ViewPoint>
+        <Viewpoint id="africa" position="2.31166 0.47804 6.25379" orientation="-0.16724 0.98541 0.03155 0.37829" zNear="0.00117" zFar="11.73804"></Viewpoint>
         <transform scale="2 2 2">
             <transform>
                 <shape>
