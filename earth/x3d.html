@@ -31,18 +31,23 @@
 </head>
 <body>
 <div id="area-panel">
-    <span onclick="">East Aisa</span>
-    <span onclick="">North America</span>
-    <span onclick="">South America</span>
-    <span onclick="">Europe</span>
-    <span onclick="document.getElementById('africa').setAttribute('set_bind','true');">Africa</span>
-    <span onclick="">Australia</span>
+    <span onclick="views.eastaisa.setAttribute('set_bind','true');">East Aisa</span>
+    <span onclick="views.northamerica.setAttribute('set_bind','true');">North America</span>
+    <span onclick="views.southamerica.setAttribute('set_bind','true');">South America</span>
+    <span onclick="views.europe.setAttribute('set_bind','true');">Europe</span>
+    <span onclick="views.africa.setAttribute('set_bind','true');">Africa</span>
+    <span onclick="views.australia.setAttribute('set_bind','true');">Australia</span>
 </div>
 <x3d>
     <scene>
         <navigationInfo type='turntable'></navigationInfo>
         <ViewPoint position="0 0 6"></ViewPoint>
-        <Viewpoint id="africa" position="2.31166 0.47804 6.25379" orientation="-0.16724 0.98541 0.03155 0.37829" zNear="0.00117" zFar="11.73804"></Viewpoint>
+        <Viewpoint id="eastaisa" position="4.59665 2.71870 -2.73485" orientation="-0.13133 0.96406 0.23095 2.13866" zNear="0.00113" zFar="11.26984"></Viewpoint>
+        <Viewpoint id="northamerica" position="-4.86314 3.42450 -0.78914" orientation="-0.24659 -0.92477 -0.28983 1.80831" zNear="2.02872" zFar="11.35692"></Viewpoint>
+        <Viewpoint id="southamerica" position="-5.12755 -1.58758 2.68100" orientation="0.21527 -0.96781 0.13036 1.11824" zNear="0.00111" zFar="11.11080"></Viewpoint>
+        <Viewpoint id="europe" position="0.96189 4.60605 3.72278" orientation="-0.95784 0.26022 0.12175 0.90872" zNear="2.02872" zFar="11.35692"></Viewpoint>
+        <Viewpoint id="africa" position="1.93405 0.50884 5.65690" orientation="-0.24739 0.96804 0.04112 0.34010" zNear="2.02872" zFar="11.35692"></Viewpoint>
+        <Viewpoint id="australia" position="3.77336 -2.92617 -3.63308" orientation="0.10657 0.96222 -0.25054 2.36463" zNear="2.02872" zFar="11.35692"></Viewpoint>
         <transform>
             <transform>
                 <shape>
@@ -67,6 +72,16 @@
 
     </scene>
 </x3d>
-
+<script>
+    var views = {}
+    document.onload = function() {
+        views.africa = document.getElementById('africa');
+        views.eastaisa = document.getElementById('eastaisa');
+        views.northamerica = document.getElementById('northamerica');
+        views.southamerica = document.getElementById('southamerica');
+        views.europe = document.getElementById('europe');
+        views.australia = document.getElementById('australia');
+    }
+</script>
 </body>
 </html> 
