@@ -27,9 +27,21 @@
             left: 10px;
             z-index: 1;
         }
+        #bar {
+            position: absolute;
+            z-index: 1;
+            left: 12.5%;
+            bottom: 7%;
+            width: 75%;
+        }
+        input[type=range] {
+            background: none;
+            outline: none;
+        }
     </style>
 </head>
 <body>
+<input type="range" name="" id="bar" min=0 max=180 step=1 onchange="setBar(this);">
 <div id="area-panel">
     <span onclick="views.eastaisa.setAttribute('set_bind','true');">East Aisa</span>
     <span onclick="views.northamerica.setAttribute('set_bind','true');">North America</span>
@@ -62,7 +74,7 @@
                 <shape>
                     <sphere radius="2"></sphere>
                     <appearance>
-                        <ImageTexture url="_scale.png">
+                        <ImageTexture id="layer1" url="_scale.png">
                                 <TextureProperties minificationFilter='NEAREST' magnificationFilter='NEAREST'></TextureProperties>
                         </ImageTexture>
                     </appearance>
@@ -73,7 +85,7 @@
     </scene>
 </x3d>
 <script>
-    var views = {}
+    var views = {}, layers = {};
     document.onload = function() {
         views.africa = document.getElementById('africa');
         views.eastaisa = document.getElementById('eastaisa');
@@ -81,6 +93,11 @@
         views.southamerica = document.getElementById('southamerica');
         views.europe = document.getElementById('europe');
         views.australia = document.getElementById('australia');
+
+        layers.layer1 = document.getElementById('layer1');
+    }
+    function setBar(range) {
+        layers.layer1.setAttribute("url", `temp2/${range.value}.png`);
     }
 </script>
 </body>
