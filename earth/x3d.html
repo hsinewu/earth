@@ -41,7 +41,7 @@
     </style>
 </head>
 <body>
-<input type="range" name="" id="bar" min=0 max=180 step=1 onchange="setBar(this);">
+<input type="range" name="" id="bar" min=0 max=180 step=1 oninput="setBar(this);">
 <div id="area-panel">
     <span onclick="views.eastaisa.setAttribute('set_bind','true');">East Aisa</span>
     <span onclick="views.northamerica.setAttribute('set_bind','true');">North America</span>
