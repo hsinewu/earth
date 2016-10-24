@@ -68,9 +68,11 @@
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
+            overflow: hidden;
 
             width: 100%;
-            height: 60vh;
+            height: 0px;
+            transition: height .1s;
         }
         .viz-item {
             width: 45px;
@@ -148,6 +150,12 @@
         views.australia = document.getElementById('australia');
 
         layers.layer1 = document.getElementById('layer1');
+
+        var viz_list = document.querySelector('.viz-list'), vl_state = false;
+        document.getElementById('dash-menu').onclick = function() {
+            vl_state = !vl_state;
+            viz_list.style.height = vl_state? '40vh': '0px';
+        }
     }
     function setBar(range) {
         layers.layer1.setAttribute("url", `temp2/${range.value}.png`);
