@@ -1,8 +1,9 @@
 <html>
 <head>
     <title>X3D earth</title>
-    <script type='text/javascript' src='js/x3dom.js'> </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel='stylesheet' type='text/css' href='css/x3dom.css'>
+    <script type='text/javascript' src='js/x3dom.js'> </script>
     <style>
         x3d
         {
@@ -38,10 +39,35 @@
             background: none;
             outline: none;
         }
+        
+        .dash{
+            display: block;
+            width: 22px;
+            height: 2px;
+            border-radius: 1px;
+            border: 1px solid #aaa;
+            margin: 2px;
+        }
+        #dash3{
+            position: absolute;
+            background-color: #555;
+            width: 27px;
+            height: 22px;
+            padding: 12px;
+
+            z-index: 1;
+            right: 5%;
+            top: 5%;
+        }
     </style>
 </head>
 <body>
 <input type="range" name="" id="bar" min=0 max=180 step=1 oninput="setBar(this);">
+<div id="dash3" style="z-index: 2;">
+    <span class="dash"></span>
+    <span class="dash"></span>
+    <span class="dash"></span>
+</div>
 <div id="area-panel">
     <span onclick="views.eastaisa.setAttribute('set_bind','true');">East Aisa</span>
     <span onclick="views.northamerica.setAttribute('set_bind','true');">North America</span>
