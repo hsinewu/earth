@@ -40,33 +40,59 @@
             outline: none;
         }
         
+        #dash-menu {
+            position: absolute;
+            z-index: 1;
+            right: 5%;
+            top: 5%;
+
+            border: 1px solid #f44;
+        }
         .dash{
-            display: block;
+            margin: 2px;
+
             width: 22px;
             height: 2px;
             border-radius: 1px;
             border: 1px solid #aaa;
-            margin: 2px;
         }
-        #dash3{
-            position: absolute;
+        .dashes {
             background-color: #555;
             width: 27px;
             height: 22px;
             padding: 12px;
+        }
+        .viz-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
 
-            z-index: 1;
-            right: 5%;
-            top: 5%;
+            width: 100%;
+            height: 60vh;
+            background-color: #88f;
+        }
+        .viz-item {
+            width: 45px;
+            height: 45px;
+            background-color: #4f4;
+            border-radius: 23px;
         }
     </style>
 </head>
 <body>
 <input type="range" name="" id="bar" min=0 max=180 step=1 oninput="setBar(this);">
-<div id="dash3" style="z-index: 2;">
-    <span class="dash"></span>
-    <span class="dash"></span>
-    <span class="dash"></span>
+<div id="dash-menu">
+    <div class="dashes">
+        <div class="dash"></div>
+        <div class="dash"></div>
+        <div class="dash"></div>
+    </div>
+    <div class="viz-list">
+        <div class="viz-item"></div>
+        <div class="viz-item"></div>
+        <div class="viz-item"></div>
+    </div>    
 </div>
 <div id="area-panel">
     <span onclick="views.eastaisa.setAttribute('set_bind','true');">East Aisa</span>
