@@ -85,7 +85,7 @@
     </style>
 </head>
 <body>
-<input type="range" name="" id="bar" min=0 max=180 step=1 oninput="setBar(this);">
+<input type="range" name="" id="bar" min=0 max=180 step=1 value=0 oninput="updateWithBar(this);">
 <div id="dash-menu">
     <div class="dashes">
         <div class="dash"></div>
@@ -141,7 +141,7 @@
     </scene>
 </x3d>
 <script>
-    var views = {}, layers = {};
+    var views = {}, layers = {}, viz = {item: 'temp2', pos: 0};
     document.onload = function() {
         views.africa = document.getElementById('africa');
         views.eastaisa = document.getElementById('eastaisa');
@@ -158,8 +158,12 @@
             viz_list.style.height = vl_state? '40vh': '0px';
         }
     }
-    function setBar(range) {
-        layers.layer1.setAttribute("url", `temp2/${range.value}.png`);
+    function updateWithBar(bar) {
+        viz.pos = bar.value;
+        update();
+    }
+    function update() {
+        layers.layer1.setAttribute("url", `${viz.item}/${viz.pos}.png`);
     }
 </script>
 </body>
