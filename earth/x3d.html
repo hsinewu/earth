@@ -144,7 +144,7 @@
     </scene>
 </x3d>
 <script>
-    var views = {}, layers = {}, viz = {item: 'temp2', pos: 0};
+    var views = {}, layers = {}, viz = {item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {};
     document.onload = function() {
         views.africa = document.getElementById('africa');
         views.eastaisa = document.getElementById('eastaisa');
@@ -152,6 +152,7 @@
         views.southamerica = document.getElementById('southamerica');
         views.europe = document.getElementById('europe');
         views.australia = document.getElementById('australia');
+        ctrls.bar = document.getElementById('bar');
 
         layers.layer1 = document.getElementById('layer1');
 
@@ -166,6 +167,23 @@
     }
     function update() {
         layers.layer1.setAttribute("url", `${viz.item}/${viz.pos}.png`);
+    }
+    function clickPlay() {
+        // toggle ui
+        var _play = function() {
+            if(viz.pos < viz.length) {
+                ctrls.bar.value = ++viz.pos;
+                update();
+                viz.timer_id = setTimeout(_play, 260);
+            } else {
+                clickPause();
+            }
+        }
+        _play();
+    }
+    function clickPause() {
+        // toggle ui
+        clearInterval(viz.timer_id);
     }
 </script>
 </body>
