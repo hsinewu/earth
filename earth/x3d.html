@@ -75,6 +75,9 @@
             height: 0px;
             transition: height .1s;
         }
+        .viz-list.active {
+            height: 40vh;
+        }
         .viz-item {
             width: 45px;
             height: 45px;
@@ -152,10 +155,9 @@
 
         layers.layer1 = document.getElementById('layer1');
 
-        var viz_list = document.querySelector('.viz-list'), vl_state = false;
+        var viz_list = document.querySelector('.viz-list');
         document.getElementById('dash-menu').onclick = function() {
-            vl_state = !vl_state;
-            viz_list.style.height = vl_state? '40vh': '0px';
+            viz_list.classList.toggle('active');
         }
     }
     function updateWithBar(bar) {
