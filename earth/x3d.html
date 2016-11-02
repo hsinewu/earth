@@ -93,9 +93,9 @@
         <div class="dash"></div>
     </div>
     <div class="viz-list">
-        <div class="viz-item">🌀</div>
-        <div class="viz-item">☂️</div>
-        <div class="viz-item">💧</div>
+        <div class="viz-item" onclick='viz.item="temp2";update()'>🌀</div>
+        <div class="viz-item" onclick='viz.item="slp";update()'>☂️</div>
+        <div class="viz-item" onclick='viz.item="";update()'>💧</div>
     </div>    
 </div>
 <div id="area-panel">
@@ -128,7 +128,7 @@
             
             <transform>
                 <shape>
-                    <sphere radius="2" subdivision="96,96"></sphere>
+                    <sphere radius="2" subdivision="96,96" solid="false"></sphere>
                     <appearance>
                         <ImageTexture id="layer1" url="temp2/0.png">
                                 <TextureProperties minificationFilter='NEAREST' magnificationFilter='NEAREST'></TextureProperties>
