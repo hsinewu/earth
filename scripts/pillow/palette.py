@@ -2,12 +2,12 @@ from scipy.io.netcdf import netcdf_file
 from PIL import Image
 from json import loads as json_loads
 from bisect import bisect_left
-from numpy import interp
 
 ncFile = 'r85.nc'
 vizItem = 'temp2'
 colorFile = 'heatColor.json'
 outputFile = '_scale.png'
+outputSize = (512,256)
 
 # read netcdf
 with netcdf_file(ncFile, 'r') as f:
@@ -20,21 +20,21 @@ with open(colorFile) as f2:
 	colorTable = json_loads(f2.read())
 
 # draw png in palette mode with pillow
-size = (512,256)
-dsize = data.shape
-
-def printPng(space, transform=lambda x:x):
-	im = Image.new("P", size)
+def printPng(space, fileName, transform=lambda x:x):
+	size = space.shape
+	im = Image.new("P", (size[1], size[0]))
 	im.putpalette(colorTable['palette'])
-	for px,py in ((x,y) for x in range(size[0]) for y in range(size[1])):
-		ln, lt = interp(px, [0, size[0]], [0, dsize[1]]), interp(py, [0, size[1]], [0, dsize[0]])
-		da = transform( data[int(lt), int(ln)])
+
+	for lt,ln in ((lat,lon) for lat in range(size[0]) for lon in range(size[1])):
+		da = transform( space[lt, ln])
 		# if data value is higher than specified color range, give it last color
 		if da >= colorTable['stops'][-1]:
 			stop_index = len(colorTable['palette']) - 1
 		else:
 			stop_index = bisect_left( colorTable['stops'], da)
-		im.putpixel((px,py), stop_index)
-	im.save(outputFile)
+		im.putpixel((ln,lt), stop_index)
+
+	resizedImage = im.resize(outputSize)
+	resizedImage.save(fileName)
 
 printPng(data[0], outputFile, lambda x: x-273.15)
