@@ -22,11 +22,11 @@ with open(colorFile) as f2:
 # draw png in palette mode with pillow
 size = (512,256)
 dsize = data.shape
-im = Image.new("P", size)
-im.putpalette(colorTable['palette'])
 
 def printPng(space, transform=lambda x:x):
-	for px,py in [(x,y) for x in range(size[0]) for y in range(size[1])]:
+	im = Image.new("P", size)
+	im.putpalette(colorTable['palette'])
+	for px,py in ((x,y) for x in range(size[0]) for y in range(size[1])):
 		ln, lt = interp(px, [0, size[0]], [0, dsize[1]]), interp(py, [0, size[1]], [0, dsize[0]])
 		da = transform( data[int(lt), int(ln)])
 		# if data value is higher than specified color range, give it last color
@@ -35,6 +35,6 @@ def printPng(space, transform=lambda x:x):
 		else:
 			stop_index = bisect_left( colorTable['stops'], da)
 		im.putpixel((px,py), stop_index)
+	im.save(outputFile)
 
-printPng(data[0], lambda x: x-273.15)
-im.save(outputFile)
+printPng(data[0], outputFile, lambda x: x-273.15)
