@@ -27,11 +27,7 @@ def printPng(space, fileName, transform=lambda x:x):
 
 	for lt,ln in ((lat,lon) for lat in range(size[0]) for lon in range(size[1])):
 		da = transform( space[lt, ln])
-		# if data value is higher than specified color range, give it last color
-		if da >= colorTable['stops'][-1]:
-			stop_index = len(colorTable['palette']) - 1
-		else:
-			stop_index = bisect_left( colorTable['stops'], da)
+		stop_index = bisect_left( colorTable['stops'], da)
 		im.putpixel((ln,lt), stop_index)
 
 	resizedImage = im.resize(outputSize)
