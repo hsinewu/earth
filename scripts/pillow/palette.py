@@ -2,6 +2,7 @@ from scipy.io.netcdf import netcdf_file
 from PIL import Image
 from json import loads as json_loads
 from bisect import bisect_left
+import numpy as np
 
 ncFile = 'r85.nc'
 vizItem = 'temp2'
@@ -11,8 +12,6 @@ outputSize = (512,256)
 
 # read netcdf
 with netcdf_file(ncFile, 'r') as f:
-	lats = f.variables['lat'][:]
-	lons = f.variables['lon'][:]
 	data = f.variables[vizItem] # (time, lat, lon)
 
 # read color data
@@ -21,14 +20,12 @@ with open(colorFile) as f2:
 
 # draw png in palette mode with pillow
 def printPng(space, fileName, transform=lambda x:x):
-	size = space.shape
-	im = Image.new("P", (size[1], size[0]))
-	im.putpalette(colorTable['palette'])
+	# map datas to indices according to colorTable
+	vfunc = np.vectorize(lambda x: bisect_left( colorTable['stops'], transform(x) ) )
+	arr = vfunc(space)
 
-	for lt,ln in ((lat,lon) for lat in range(size[0]) for lon in range(size[1])):
-		da = transform( space[lt, ln])
-		stop_index = bisect_left( colorTable['stops'], da)
-		im.putpixel((ln,lt), stop_index)
+	im = Image.fromarray((arr).astype('uint8'), 'P')
+	im.putpalette(colorTable['palette'])
 
 	resizedImage = im.resize(outputSize)
 	resizedImage.save(fileName)
