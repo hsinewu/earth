@@ -180,7 +180,7 @@
         </script>
         <script>
             var views = {}, layers = {}, viz = {item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting = {};
-            window.onload = function() {
+            function bindDOM() {
                 ctrls.bar = document.getElementById('bar');
 
                 var viz_list = document.querySelector('.viz-list');
@@ -191,37 +191,37 @@
                 var play_ctrl = document.getElementById('play-control'), play_state=true;
                 play_ctrl.onclick = function() {
                     if(play_state) {
-                        clickPlay();
+                        playAnime();
                         play_ctrl.children[0].setAttribute('viewBox', '0 0 36 36');
                     } else {
-                        clickPause();
+                        stopAnime();
                         play_ctrl.children[0].setAttribute('viewBox', '36 0 36 36');
                     }
                     play_state = !play_state;
                 }
             }
+
             function updateWithBar(bar) {
                 viz.pos = bar.value;
                 updateViz();
             }
             function updateViz() {
                 materialShell.map = THREE.ImageUtils.loadTexture(`${viz.item}/${viz.pos}.png`);
+                materialShell.map.magFilter = THREE.NearestFilter
             }
-            function clickPlay() {
-                // toggle ui
+            function playAnime() {
                 var _play = function() {
                     if(viz.pos < viz.length) {
                         ctrls.bar.value = ++viz.pos;
                         updateViz();
                         viz.timer_id = setTimeout(_play, 260);
                     } else {
-                        clickPause();
+                        stopAnime();
                     }
                 }
                 _play();
             }
-            function clickPause() {
-                // toggle ui
+            function stopAnime() {
                 clearInterval(viz.timer_id);
             }
 
@@ -291,13 +291,14 @@
             var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
             ,   materialShell = new THREE.MeshBasicMaterial();
             materialShell.map = THREE.ImageUtils.loadTexture('temp2/1.png');
+            materialShell.map.magFilter = THREE.NearestFilter
             materialShell.transparent = true;
             var shellMesh = new THREE.Mesh(geometryShell, materialShell);
             scene.add(shellMesh);
 
             camera.position.z = 12;
 
-            var animate = function () {
+            function animate() {
 
                 requestAnimationFrame( animate );
 
@@ -307,10 +308,22 @@
 
             };
 
-            animate();
+            function onWindowResize(){
 
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+
+                renderer.setSize( window.innerWidth, window.innerHeight );
+
+            }
+            
+            window.onload = function() {
+                bindDOM();
+                animate();
+            }
+            window.addEventListener( 'resize', onWindowResize, false );
         </script>
-        
+
         <script src="js/dat.gui.min.js"></script>
         <script>
             setting = {
