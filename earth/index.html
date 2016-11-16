@@ -4,9 +4,6 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta http-equiv="X-Frame-Options" content="sameorigin"> <!-- meta is not reliable, use http header instead -->
 
-        <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
-        <script>if(!document.querySelector('link[href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"]').length)document.write('<link rel="stylesheet" href="css/font-awesome.min.css">')</script>
-        
         <link rel="stylesheet" href="css/temperature.css">
         <style>
             body { margin: 0; }
@@ -25,22 +22,6 @@
             #label:hover{
                 opacity: 1;
             }
-            #menu:hover{
-                height: 300px;
-                width: 200px;
-                transition-delay: 0s;
-            }
-            #date{
-                width: 100px;
-            }
-            #player{
-                position: absolute;
-                bottom: 55px;
-                left: 8%;
-            }
-            #play-button, #pause-button {
-                color: #fff;
-            }
             #area-panel{
                 position: absolute;
                 display: flex;
@@ -52,25 +33,94 @@
                 top: 10px;
                 left: 10px;
             }
-            #progress-bar{
-                height: 12px;
-                width: 40%;
+            #play-control {
                 position: absolute;
-                bottom: 30px;
-                left: 30%;
-                border-radius: 6px;
-                background: linear-gradient( to right, #fff, 1%, #777, 1%, #777);
+                left: calc(12.5% - 64px);
+                bottom: calc(7% - 24px);
+                z-index: 2;
+            }
+            #play-control>svg {
+                width: 64px;
+                height: 64px;
+                fill: #fff;
+            }
+            #bar {
+                position: absolute;
+                z-index: 1;
+                left: 12.5%;
+                bottom: 7%;
+                width: 75%;
+            }
+            input[type=range] {
+                background: none;
+                outline: none;
+            }
+            
+            #dash-menu {
+                position: absolute;
+                z-index: 1;
+                right: 5%;
+                top: 5%;
+            }
+            .dash{
+                margin: 2px;
+                width: 22px;
+                height: 2px;
+                border-radius: 1px;
+                border: 1px solid #aaa;
+                background-color: #eee;
+            }
+            .dashes {
+                background-color: #555;
+                width: 27px;
+                height: 22px;
+                padding: 12px;
+            }
+            .viz-list {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                align-items: center;
+                overflow: hidden;
+                width: 100%;
+                height: 0px;
+                transition: height .1s;
+            }
+            .viz-list.active {
+                height: 40vh;
+            }
+            .viz-item {
+                width: 45px;
+                height: 45px;
+                border: 1px solid #eee;
+                border-radius: 23px;
+                font-size: 45px;
             }
         </style>
     </head>
     <body>
-        <div id="container"></div>
-        <div id="label">2016/8/9</div>
-        <div id="progress-bar"></div>
-        <div id="player">
-            <i id="play-button" class="fa fa-play fa-3x" onclick="switchPlay(true)"></i>
-            <i id="pause-button" class="fa fa-pause fa-3x" style="display: none" onclick="switchPlay(false)"></i>
+    <div id="container"></div>
+
+    <div id="label">2016/8/9</div>
+    <div id="play-control">
+        <svg viewBox="36 0 36 36">
+          <path id="pause-icon" d="M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26" />
+          <path id="play-icon" d="M47,10 L54,13.74 54,22.25 47,26 M54,13.74 L62,18 62,18 54,22.28" />
+        </svg>
+    </div>
+    <input type="range" name="" id="bar" min=0 max=180 step=1 value=0 oninput="updateWithBar(this);">
+    <div id="dash-menu">
+        <div class="dashes">
+            <div class="dash"></div>
+            <div class="dash"></div>
+            <div class="dash"></div>
         </div>
+        <div class="viz-list">
+            <div class="viz-item" onclick='viz.item="temp2";updateViz()'>🌀</div>
+            <div class="viz-item" onclick='viz.item="slp";updateViz()'>☂️</div>
+            <div class="viz-item" onclick='viz.item="";updateViz()'>💧</div>
+        </div>    
+    </div>
         <div id="area-panel">
             <span onclick="setGeoCam(25, 115)">East Aisa</span>
             <span onclick="setGeoCam(45, -100)">North America</span>
@@ -129,50 +179,50 @@
             }
         </script>
         <script>
-            var play = document.getElementById('play-button')
-            ,   pause = document.getElementById('pause-button')
-            ,   play_id, currentMap = '200908.0100_t_001';
+            var views = {}, layers = {}, viz = {item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting = {};
+            window.onload = function() {
+                ctrls.bar = document.getElementById('bar');
 
-            function switchPlay(isPlayClicked) {
+                var viz_list = document.querySelector('.viz-list');
+                document.getElementById('dash-menu').onclick = function() {
+                    viz_list.classList.toggle('active');
+                }
 
-                if (isPlayClicked) {
-
-                    play.style = 'disPlay: none';
-                    pause.style = '';
-                    playMaps();
-
-                } else {
-
-                    play.style = '';
-                    pause.style = 'disPlay: none';
-                    clearTimeout(play_id);
-
+                var play_ctrl = document.getElementById('play-control'), play_state=true;
+                play_ctrl.onclick = function() {
+                    if(play_state) {
+                        clickPlay();
+                        play_ctrl.children[0].setAttribute('viewBox', '0 0 36 36');
+                    } else {
+                        clickPause();
+                        play_ctrl.children[0].setAttribute('viewBox', '36 0 36 36');
+                    }
+                    play_state = !play_state;
                 }
             }
-
-
-            var bar = document.getElementById('progress-bar');
-            function setProgress( fraction) {
-
-                var percent = parseInt( fraction*100) + '%';
-                bar.style = `background: linear-gradient( to right, #fff, ${percent}, #777, ${percent}, #777);`;
-
+            function updateWithBar(bar) {
+                viz.pos = bar.value;
+                updateViz();
             }
-
-            bar.addEventListener( 'click', function(e) {
-
-                setPlay( (e.layerX+10)/ bar.clientWidth);
-
-            })
-
-            function setPlay( fraction) {
-
-                var n = Math.max( 1, Math.min( 55, Math.floor( fraction*55)))
-                ,   d = Math.floor( n/4) + 1
-                ,   t = n%4;
-
-                setMap( toTmptUrl( tmpt.year, tmpt.month, d, t, tmpt.height));
-
+            function updateViz() {
+                materialShell.map = THREE.ImageUtils.loadTexture(`${viz.item}/${viz.pos}.png`);
+            }
+            function clickPlay() {
+                // toggle ui
+                var _play = function() {
+                    if(viz.pos < viz.length) {
+                        ctrls.bar.value = ++viz.pos;
+                        updateViz();
+                        viz.timer_id = setTimeout(_play, 260);
+                    } else {
+                        clickPause();
+                    }
+                }
+                _play();
+            }
+            function clickPause() {
+                // toggle ui
+                clearInterval(viz.timer_id);
             }
 
             function setGeoCam( lat, lng) {
@@ -240,14 +290,13 @@
             // shell
             var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
             ,   materialShell = new THREE.MeshBasicMaterial();
-            materialShell.map = THREE.ImageUtils.loadTexture('images2/200908.0100_t_016.png');
+            materialShell.map = THREE.ImageUtils.loadTexture('temp2/1.png');
             materialShell.transparent = true;
             var shellMesh = new THREE.Mesh(geometryShell, materialShell);
             scene.add(shellMesh);
 
             camera.position.z = 12;
 
-            var tmpt
             var animate = function () {
 
                 requestAnimationFrame( animate );
@@ -260,33 +309,11 @@
 
             animate();
 
-            function playMaps() {
-
-                let next = +currentMap.slice( -2);
-                next += 16;
-
-                if ( next > 63) {
-
-                    next %= 16;
-                    var nextMap = currentMap.replace(/(\d\d)00_t/, function(s, a) {
-                        a = +a + 1;
-                        return fillz( a, 2) + '00_t';
-                    }).slice( 0, -2) + fillz( next, 2);
-
-                } else {
-
-                    var nextMap = currentMap.slice( 0, -2) + next;
-
-                }
-
-                setMap( nextMap, playMaps);
-
-            }
-
         </script>
+        
         <script src="js/dat.gui.min.js"></script>
         <script>
-            tmpt = {
+            setting = {
                 year: 2009,
                 month: 8,
                 day: 2,
@@ -297,100 +324,41 @@
                 shadow: true
             };
 
-            function update() {
-                setMap( toTmptUrl(tmpt.year, tmpt.month, tmpt.day, tmpt.hour, tmpt.height));
+            function guiUpdate() {
+                // setMap( toTmptUrl(setting.year, setting.month, setting.day, setting.hour, setting.height));
             }
 
             var gui = new dat.GUI()
             ,   tgui = gui.addFolder('Temparature');
 
-            tgui.add(tmpt, 'year', [2009])
-                .onChange( update);
+            tgui.add(setting, 'year', [2009])
+                .onChange( guiUpdate);
 
-            tgui.add(tmpt, 'month', [8])
-                .onChange( update);
+            tgui.add(setting, 'month', [8])
+                .onChange( guiUpdate);
 
-            tgui.add(tmpt, 'day', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
-                .onChange( update);
+            tgui.add(setting, 'day', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+                .onChange( guiUpdate);
 
-            tgui.add(tmpt, 'hour', {
+            tgui.add(setting, 'hour', {
                 '0:00': 0, '6:00': 1, '12:00': 2, '18:00': 3
-            }).onChange( update);
+            }).onChange( guiUpdate);
 
-            tgui.add(tmpt, 'height', {
+            tgui.add(setting, 'height', {
             "10": 0, "30": 1, "50": 2, "70": 3, "100": 4, "150": 5, "200": 6, "250": 7, "300": 8, "400": 9, "500": 10, "600": 11, "700": 12, "850":   13, "925": 14, "1000": 15
-            }).onChange( update);
+            }).onChange( guiUpdate);
 
-            tgui.add(tmpt, 'playInterval', 100, 5000);
-            tgui.add(tmpt, 'rotationSpeed', 0, 100)
+            tgui.add(setting, 'playInterval', 100, 5000);
+            tgui.add(setting, 'rotationSpeed', 0, 100)
                 .step(1)
                 .onChange( function() {
-                    orbits.autoRotateSpeed=tmpt.rotationSpeed
+                    orbits.autoRotateSpeed=setting.rotationSpeed
                 });
 
-            tgui.add(tmpt, 'shadow')
+            tgui.add(setting, 'shadow')
                 .onChange( setShadow);
 
             tgui.open();
-        </script>
-        <script>
-            // fname: no .png posfix
-            function setMap(fname, cb){
-
-                function _setMap(t){
-
-                    materialShell.map = t;
-                    currentMap = fname;
-
-                    label.innerText = fname.replace(/(\d\d\d\d)(\d\d).(\d\d)00_t_(\d\d\d)/, function(s, y, m, d, se){
-
-                        // 55 datetime in given test data
-                        setProgress( ((d-1)*4+ ~~(se/16))/ 55);   // lol
-                        return `${+y}/${+m}/${+d} ${~~(se/16)*6}:00`;
-
-                    });
-
-                    if(cb) {
-                        play_id = setTimeout(cb, tmpt.playInterval);
-                    }
-
-                }
-            
-
-                if(fname in maps){
-
-                    _setMap( maps[fname]);
-
-                }else{
-
-                    var url = 'images2/'+fname+'.png';
-                    loader.load(url, (texture)=>{
-
-                        _setMap( maps[fname]=texture);
-
-                    }, (xhr)=>{
-
-                        console.log( (xhr.loaded / xhr.total * 100) + '% loaded');
-
-                    }, (xhr)=>{
-
-                        // TODO
-                        if(cb) /*tog()*/;   
-                        else
-                        alert('404');
-
-                    })
-
-                }
-            }
-
-            function toTmptUrl(y, m, d, t, h){
-
-                y=+y; m=+m; d=+d; t=+t; h=+h;
-                var serial = t*16+h;
-                return `${y}${fillz(m, 2)}.${fillz(d, 2)}00_t_${fillz(serial, 3)}`;
-
-            }
         </script>
     </body>
 </html>
