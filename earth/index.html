@@ -182,12 +182,7 @@
                 
             }
 
-            function setShadow(on) {
-
-                three.directLight.intensity  = +on;
-                three.ambientLight.intensity =+!on +.3;
-
-            }
+            
 
             function initThree() {
                 var container = document.getElementById('container')
@@ -242,35 +237,35 @@
                 three.orbits = orbits;
                 three.earth = earthMesh;
                 three.shell = shellMesh;
-                three.directLight = directLight;
-                three.ambientLight = ambientLight;
+                three.render = ()=>renderer.render(three.scene, three.camera);
+                three.onResize = function() {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+
+                    renderer.setSize( window.innerWidth, window.innerHeight );
+                }
+                three.setShadow = function(on) {
+                    directLight.intensity  = +on;
+                    ambientLight.intensity =+!on +.3;
+                }
             }
 
             function animate() {
 
                 requestAnimationFrame( animate );
 
-                three.renderer.render(three.scene, three.camera);
+                three.render();
                 TWEEN.update();
                 three.orbits.update();
 
             };
 
-            function onWindowResize(){
-
-                three.camera.aspect = window.innerWidth / window.innerHeight;
-                three.camera.updateProjectionMatrix();
-
-                three.renderer.setSize( window.innerWidth, window.innerHeight );
-
-            }
-            
             window.onload = function() {
                 initThree();
                 bindDOM();
                 animate();
             }
-            window.addEventListener( 'resize', onWindowResize, false );
+            window.addEventListener( 'resize', three.onResize.bind(three), false );
         </script>
 
         <script src="js/dat.gui.min.js"></script>
@@ -297,7 +292,7 @@
                 .onChange( (v)=>three.orbits.autoRotateSpeed=v);
 
             tgui.add(setting, 'shadow')
-                .onChange( setShadow);
+                .onChange( (v)=>three.setShadow(v)); // bind to this
 
             tgui.open();
         </script>
