@@ -143,8 +143,7 @@
                 updateViz();
             }
             function updateViz() {
-                three.shell.material.map = THREE.ImageUtils.loadTexture(`${viz.item}/${viz.pos}.png`);
-                three.shell.material.map.magFilter = THREE.NearestFilter
+                three.shell.material.map = three.textures[viz.item][viz.pos];
             }
             function playAnime() {
                 var _play = function() {
@@ -187,7 +186,7 @@
             function initThree() {
                 var container = document.getElementById('container')
                 ,   loader = new THREE.TextureLoader()
-                ,   maps={};
+                ,   textures={};
                 
                 // init
                 var scene = new THREE.Scene()
@@ -196,12 +195,13 @@
 
                 container.appendChild(renderer.domElement);
                 renderer.setSize( window.innerWidth, window.innerHeight );
+                camera.position.z = 12;
 
                 var orbits = new THREE.OrbitControls( camera, renderer.domElement );
                 orbits.maxDistance = 12;
                 orbits.minDistance = 6;
                 orbits.enablePan = false;
-                orbits.autoRotate = true;
+                orbits.autoRotate = true;   
                 orbits.autoRotateSpeed = 1;
 
                 var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
@@ -209,27 +209,34 @@
                 directLight.position.set(5,3,5);
                 scene.add( directLight );
                 scene.add( ambientLight );
+
                 // earth
                 var geometry = new THREE.SphereGeometry(5, 32, 32)
                 ,   material = new THREE.MeshPhongMaterial();
-                material.map = THREE.ImageUtils.loadTexture('textures/earthmap1k.jpg');
-                material.bumpMap = THREE.ImageUtils.loadTexture('textures/earthbump1k.jpg');
+                material.map = loader.load('textures/earthmap1k.jpg');
+                material.bumpMap = loader.load('textures/earthbump1k.jpg');
                 material.bumpScale = 0.1;
-                material.specularMap = THREE.ImageUtils.loadTexture('textures/earthspec1k.jpg');
+                material.specularMap = loader.load('textures/earthspec1k.jpg');
                 loader.load('textures/earthmap4k.jpg', (t)=>material.map=t);
                 loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t);
                 var earthMesh = new THREE.Mesh(geometry, material);
                 scene.add(earthMesh);
+
                 // shell
                 var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
                 ,   materialShell = new THREE.MeshBasicMaterial();
-                materialShell.map = THREE.ImageUtils.loadTexture('temp2/1.png');
+                materialShell.map = loader.load('temp2/1.png');
                 materialShell.map.magFilter = THREE.NearestFilter
                 materialShell.transparent = true;
                 var shellMesh = new THREE.Mesh(geometryShell, materialShell);
                 scene.add(shellMesh);
 
-                camera.position.z = 12;
+                // preload
+                textures.temp2 = [];
+                for(var i=0; i<180; i++) {
+                    textures.temp2[i] = loader.load(`temp2/${i}.png`);
+                    textures.temp2[i].magFilter = THREE.NearestFilter
+                }
 
                 three.scene = scene;
                 three.camera = camera;
@@ -237,6 +244,7 @@
                 three.orbits = orbits;
                 three.earth = earthMesh;
                 three.shell = shellMesh;
+                three.textures = textures;
                 three.render = ()=>renderer.render(three.scene, three.camera);
                 three.onResize = function() {
                     camera.aspect = window.innerWidth / window.innerHeight;
@@ -265,7 +273,7 @@
                 bindDOM();
                 animate();
             }
-            window.addEventListener( 'resize', three.onResize.bind(three), false );
+            window.addEventListener( 'resize', ()=>three.onResize(), false );
         </script>
 
         <script src="js/dat.gui.min.js"></script>
