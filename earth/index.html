@@ -62,40 +62,6 @@
                 right: 5%;
                 top: 5%;
             }
-            .dash{
-                margin: 2px;
-                width: 22px;
-                height: 2px;
-                border-radius: 1px;
-                border: 1px solid #aaa;
-                background-color: #eee;
-            }
-            .dashes {
-                background-color: #555;
-                width: 27px;
-                height: 22px;
-                padding: 12px;
-            }
-            .viz-list {
-                display: flex;
-                flex-direction: column;
-                justify-content: space-around;
-                align-items: center;
-                overflow: hidden;
-                width: 100%;
-                height: 0px;
-                transition: height .1s;
-            }
-            .viz-list.active {
-                height: 40vh;
-            }
-            .viz-item {
-                width: 45px;
-                height: 45px;
-                border: 1px solid #eee;
-                border-radius: 23px;
-                font-size: 45px;
-            }
         </style>
     </head>
     <body>
@@ -109,18 +75,6 @@
         </svg>
     </div>
     <input type="range" name="" id="bar" min=0 max=180 step=1 value=0 oninput="updateWithBar(this);">
-    <div id="dash-menu">
-        <div class="dashes">
-            <div class="dash"></div>
-            <div class="dash"></div>
-            <div class="dash"></div>
-        </div>
-        <div class="viz-list">
-            <div class="viz-item" onclick='viz.item="temp2";updateViz()'>🌀</div>
-            <div class="viz-item" onclick='viz.item="slp";updateViz()'>☂️</div>
-            <div class="viz-item" onclick='viz.item="";updateViz()'>💧</div>
-        </div>    
-    </div>
         <div id="area-panel">
             <span onclick="setGeoCam(25, 115)">East Aisa</span>
             <span onclick="setGeoCam(45, -100)">North America</span>
@@ -128,18 +82,6 @@
             <span onclick="setGeoCam(50, 5)">Europe</span>
             <span onclick="setGeoCam(15, 15)">Africa</span>
             <span onclick="setGeoCam(-25, 135)">Australia</span>
-        </div>
-        <div id="t">
-            <div id="t-legend">
-                <div id="t-legend-text">
-                    <span>40</span>
-                    <span>20</span>
-                    <span>0</span>
-                    <span>-20</span>
-                    <span>-40</span>
-                </div>
-                <div id="t-legend-celsius">°C</div>
-            </div>
         </div>
         <script src="js/Tween.js"></script>
         <script scr="//cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script><script>window.THREE||document.write('<script src="js/three.min.js"><\/script>');</script>
@@ -182,11 +124,6 @@
             var views = {}, layers = {}, viz = {item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting = {};
             function bindDOM() {
                 ctrls.bar = document.getElementById('bar');
-
-                var viz_list = document.querySelector('.viz-list');
-                document.getElementById('dash-menu').onclick = function() {
-                    viz_list.classList.toggle('active');
-                }
 
                 var play_ctrl = document.getElementById('play-control'), play_state=true;
                 play_ctrl.onclick = function() {
@@ -328,17 +265,12 @@
         <script>
             setting = {
                 year: 2009,
-                month: 8,
-                day: 2,
-                hour: 0,
-                height: 0,
                 playInterval: 1000,
                 rotationSpeed: 1,
                 shadow: true
             };
 
             function guiUpdate() {
-                // setMap( toTmptUrl(setting.year, setting.month, setting.day, setting.hour, setting.height));
             }
 
             var gui = new dat.GUI()
@@ -347,26 +279,10 @@
             tgui.add(setting, 'year', [2009])
                 .onChange( guiUpdate);
 
-            tgui.add(setting, 'month', [8])
-                .onChange( guiUpdate);
-
-            tgui.add(setting, 'day', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
-                .onChange( guiUpdate);
-
-            tgui.add(setting, 'hour', {
-                '0:00': 0, '6:00': 1, '12:00': 2, '18:00': 3
-            }).onChange( guiUpdate);
-
-            tgui.add(setting, 'height', {
-            "10": 0, "30": 1, "50": 2, "70": 3, "100": 4, "150": 5, "200": 6, "250": 7, "300": 8, "400": 9, "500": 10, "600": 11, "700": 12, "850":   13, "925": 14, "1000": 15
-            }).onChange( guiUpdate);
-
             tgui.add(setting, 'playInterval', 100, 5000);
             tgui.add(setting, 'rotationSpeed', 0, 100)
                 .step(1)
-                .onChange( function() {
-                    orbits.autoRotateSpeed=setting.rotationSpeed
-                });
+                .onChange( (v)=>orbits.autoRotateSpeed=v);
 
             tgui.add(setting, 'shadow')
                 .onChange( setShadow);
