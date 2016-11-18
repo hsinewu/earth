@@ -121,7 +121,7 @@
             }
         </script>
         <script>
-            var views = {}, layers = {}, viz = {item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting = {};
+            var viz = {item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting = {}, three = {};
             function bindDOM() {
                 ctrls.bar = document.getElementById('bar');
 
@@ -143,8 +143,8 @@
                 updateViz();
             }
             function updateViz() {
-                materialShell.map = THREE.ImageUtils.loadTexture(`${viz.item}/${viz.pos}.png`);
-                materialShell.map.magFilter = THREE.NearestFilter
+                three.shell.material.map = THREE.ImageUtils.loadTexture(`${viz.item}/${viz.pos}.png`);
+                three.shell.material.map.magFilter = THREE.NearestFilter
             }
             function playAnime() {
                 var _play = function() {
@@ -170,91 +170,103 @@
 
             function setSphereCam( theta, phi) {
 
-                var start = cart2sph(camera.position.z, camera.position.x, camera.position.y);
+                var start = cart2sph(three.camera.position.z, three.camera.position.x, three.camera.position.y);
                 var tween = new TWEEN.Tween(start).to({
                     r: 8, t: theta, p: phi
                 }, 500)
                 .onUpdate( function() {
                     var point = sph2cart( start.r, start.t, start.p)
-                    camera.position.set( point.y, point.z, point.x);
-                    camera.lookAt( new THREE.Vector3(0,0,0));
+                    three.camera.position.set( point.y, point.z, point.x);
+                    three.camera.lookAt( new THREE.Vector3(0,0,0));
                 }).start();
                 
             }
 
             function setShadow(on) {
 
-                directLight.intensity  = +on;
-                ambientLight.intensity =+!on +.3;
+                three.directLight.intensity  = +on;
+                three.ambientLight.intensity =+!on +.3;
 
             }
 
-            var container = document.getElementById('container')
-            ,   loader = new THREE.TextureLoader()
-            ,   maps={}, itemN = 0;
-            
-            // init
-            var scene = new THREE.Scene()
-            ,   camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 )
-            ,   renderer = new THREE.WebGLRenderer();
+            function initThree() {
+                var container = document.getElementById('container')
+                ,   loader = new THREE.TextureLoader()
+                ,   maps={};
+                
+                // init
+                var scene = new THREE.Scene()
+                ,   camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 )
+                ,   renderer = new THREE.WebGLRenderer();
 
-            container.appendChild(renderer.domElement);
-            renderer.setSize( window.innerWidth, window.innerHeight );
+                container.appendChild(renderer.domElement);
+                renderer.setSize( window.innerWidth, window.innerHeight );
 
-            var orbits = new THREE.OrbitControls( camera, renderer.domElement );
-            orbits.maxDistance = 12;
-            orbits.minDistance = 6;
-            orbits.enablePan = false;
-            orbits.autoRotate = true;
-            orbits.autoRotateSpeed = 1;
+                var orbits = new THREE.OrbitControls( camera, renderer.domElement );
+                orbits.maxDistance = 12;
+                orbits.minDistance = 6;
+                orbits.enablePan = false;
+                orbits.autoRotate = true;
+                orbits.autoRotateSpeed = 1;
 
-            var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
-            ,   ambientLight = new THREE.AmbientLight( 0xcccccc, .3);
-            directLight.position.set(5,3,5);
-            scene.add( directLight );
-            scene.add( ambientLight );
-            // earth
-            var geometry = new THREE.SphereGeometry(5, 32, 32)
-            ,   material = new THREE.MeshPhongMaterial();
-            material.map = THREE.ImageUtils.loadTexture('textures/earthmap1k.jpg');
-            material.bumpMap = THREE.ImageUtils.loadTexture('textures/earthbump1k.jpg');
-            material.bumpScale = 0.1;
-            material.specularMap = THREE.ImageUtils.loadTexture('textures/earthspec1k.jpg');
-            loader.load('textures/earthmap4k.jpg', (t)=>material.map=t);
-            loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t);
-            var earthMesh = new THREE.Mesh(geometry, material);
-            scene.add(earthMesh);
-            // shell
-            var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
-            ,   materialShell = new THREE.MeshBasicMaterial();
-            materialShell.map = THREE.ImageUtils.loadTexture('temp2/1.png');
-            materialShell.map.magFilter = THREE.NearestFilter
-            materialShell.transparent = true;
-            var shellMesh = new THREE.Mesh(geometryShell, materialShell);
-            scene.add(shellMesh);
+                var directLight = new THREE.DirectionalLight( 0xcccccc, 1)
+                ,   ambientLight = new THREE.AmbientLight( 0xcccccc, .3);
+                directLight.position.set(5,3,5);
+                scene.add( directLight );
+                scene.add( ambientLight );
+                // earth
+                var geometry = new THREE.SphereGeometry(5, 32, 32)
+                ,   material = new THREE.MeshPhongMaterial();
+                material.map = THREE.ImageUtils.loadTexture('textures/earthmap1k.jpg');
+                material.bumpMap = THREE.ImageUtils.loadTexture('textures/earthbump1k.jpg');
+                material.bumpScale = 0.1;
+                material.specularMap = THREE.ImageUtils.loadTexture('textures/earthspec1k.jpg');
+                loader.load('textures/earthmap4k.jpg', (t)=>material.map=t);
+                loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t);
+                var earthMesh = new THREE.Mesh(geometry, material);
+                scene.add(earthMesh);
+                // shell
+                var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
+                ,   materialShell = new THREE.MeshBasicMaterial();
+                materialShell.map = THREE.ImageUtils.loadTexture('temp2/1.png');
+                materialShell.map.magFilter = THREE.NearestFilter
+                materialShell.transparent = true;
+                var shellMesh = new THREE.Mesh(geometryShell, materialShell);
+                scene.add(shellMesh);
 
-            camera.position.z = 12;
+                camera.position.z = 12;
+
+                three.scene = scene;
+                three.camera = camera;
+                three.renderer = renderer;
+                three.orbits = orbits;
+                three.earth = earthMesh;
+                three.shell = shellMesh;
+                three.directLight = directLight;
+                three.ambientLight = ambientLight;
+            }
 
             function animate() {
 
                 requestAnimationFrame( animate );
 
-                renderer.render(scene, camera);
+                three.renderer.render(three.scene, three.camera);
                 TWEEN.update();
-                orbits.update();
+                three.orbits.update();
 
             };
 
             function onWindowResize(){
 
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
+                three.camera.aspect = window.innerWidth / window.innerHeight;
+                three.camera.updateProjectionMatrix();
 
-                renderer.setSize( window.innerWidth, window.innerHeight );
+                three.renderer.setSize( window.innerWidth, window.innerHeight );
 
             }
             
             window.onload = function() {
+                initThree();
                 bindDOM();
                 animate();
             }
@@ -282,7 +294,7 @@
             tgui.add(setting, 'playInterval', 100, 5000);
             tgui.add(setting, 'rotationSpeed', 0, 100)
                 .step(1)
-                .onChange( (v)=>orbits.autoRotateSpeed=v);
+                .onChange( (v)=>three.orbits.autoRotateSpeed=v);
 
             tgui.add(setting, 'shadow')
                 .onChange( setShadow);
