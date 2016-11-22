@@ -2,6 +2,7 @@
     <head>
         <title>🌎</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="X-Frame-Options" content="sameorigin"> <!-- meta is not reliable, use http header instead -->
 
         <link rel="stylesheet" href="css/temperature.css">
@@ -150,7 +151,7 @@
                     if(viz.pos < viz.length) {
                         ctrls.bar.value = ++viz.pos;
                         updateViz();
-                        viz.timer_id = setTimeout(_play, 260);
+                        viz.timer_id = setTimeout(_play, setting.playSpeed);
                     } else {
                         stopAnime();
                     }
@@ -217,8 +218,8 @@
                 material.bumpMap = loader.load('textures/earthbump1k.jpg');
                 material.bumpScale = 0.1;
                 material.specularMap = loader.load('textures/earthspec1k.jpg');
-                loader.load('textures/earthmap4k.jpg', (t)=>material.map=t);
-                loader.load('textures/earthbump4k.jpg', (t)=>material.bumpMap=t);
+                material.map = loader.load('textures/earthmap4k.jpg');
+                material.bumpMap = loader.load('textures/earthbump4k.jpg');
                 var earthMesh = new THREE.Mesh(geometry, material);
                 scene.add(earthMesh);
 
@@ -228,6 +229,7 @@
                 materialShell.map = loader.load('temp2/1.png');
                 materialShell.map.magFilter = THREE.NearestFilter
                 materialShell.transparent = true;
+                materialShell.opacity = setting.opacity;
                 var shellMesh = new THREE.Mesh(geometryShell, materialShell);
                 scene.add(shellMesh);
 
@@ -236,6 +238,11 @@
                 for(var i=0; i<180; i++) {
                     textures.temp2[i] = loader.load(`temp2/${i}.png`);
                     textures.temp2[i].magFilter = THREE.NearestFilter
+                }
+                textures.slp = [];
+                for(var i=0; i<180; i++) {
+                    textures.slp[i] = loader.load(`slp/${i}.png`);
+                    textures.slp[i].magFilter = THREE.NearestFilter
                 }
 
                 three.scene = scene;
@@ -272,6 +279,7 @@
                 initThree();
                 bindDOM();
                 animate();
+                document.querySelector('')
             }
             window.addEventListener( 'resize', ()=>three.onResize(), false );
         </script>
@@ -279,30 +287,31 @@
         <script src="js/dat.gui.min.js"></script>
         <script>
             setting = {
-                year: 2009,
-                playInterval: 1000,
+                data: 'temp2',
+                playSpeed: 450,
                 rotationSpeed: 1,
+                opacity: .6,
                 shadow: true
             };
 
-            function guiUpdate() {
-            }
+            var gui = new dat.GUI();
 
-            var gui = new dat.GUI()
-            ,   tgui = gui.addFolder('Temparature');
+            gui.add(setting, 'data', ['temp2', 'slp'])
+                .onChange( (v)=>{viz.item=v; updateViz();} );
 
-            tgui.add(setting, 'year', [2009])
-                .onChange( guiUpdate);
-
-            tgui.add(setting, 'playInterval', 100, 5000);
-            tgui.add(setting, 'rotationSpeed', 0, 100)
+            gui.add(setting, 'playSpeed', {
+                slow: 1500, average: 450, fast: 140
+            });
+            gui.add(setting, 'rotationSpeed', -25, 25)
                 .step(1)
                 .onChange( (v)=>three.orbits.autoRotateSpeed=v);
 
-            tgui.add(setting, 'shadow')
+            gui.add(setting, 'opacity', .0, 1.)
+                .onChange( (v)=>three.shell.material.opacity=v )
+            gui.add(setting, 'shadow')
                 .onChange( (v)=>three.setShadow(v)); // bind to this
 
-            tgui.open();
+            gui.open();
         </script>
     </body>
 </html>
