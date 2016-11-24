@@ -4,19 +4,12 @@ from json import loads as json_loads
 from bisect import bisect_left
 import numpy as np
 
-ncFile = 'r85.nc'
-vizItem = 'temp2'
 colorFile = 'heatColor.json'
-outputFile = '_scale.png'
-outputSize = (512,256)
-
-# read netcdf
-with netcdf_file(ncFile, 'r') as f:
-	data = f.variables[vizItem] # (time, lat, lon)
+# outputSize = (512,256)
 
 # read color data
-with open(colorFile) as f2:
-	colorTable = json_loads(f2.read())
+with open(colorFile) as f:
+	colorTable = json_loads(f.read())
 
 # draw png in palette mode with pillow
 def printPng(space, fileName, transform=lambda x:x):
@@ -27,7 +20,17 @@ def printPng(space, fileName, transform=lambda x:x):
 	im = Image.fromarray((arr).astype('uint8'), 'P')
 	im.putpalette(colorTable['palette'])
 
-	resizedImage = im.resize(outputSize)
-	resizedImage.save(fileName)
+	if 'outputSize' in globals():
+		im = im.resize(outputSize)
+	im.save(fileName)
 
-printPng(data[0], outputFile, lambda x: x-273.15)
+if __name__ == '__main__':
+	ncFile = 'r85.nc'
+	vizItem = 'temp2'
+	outputFile = '_scale.png'
+
+	# read netcdf
+	with netcdf_file(ncFile, 'r') as f:
+		data = f.variables[vizItem] # (time, lat, lon)
+
+	printPng(data[0], outputFile, lambda x: x-273.15)
