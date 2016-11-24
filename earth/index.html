@@ -19,6 +19,8 @@
                 bottom: 100px;
                 text-align: center;
                 border-radius: 5px;
+
+                display: none;
             }
             #label:hover{
                 opacity: 1;
@@ -226,7 +228,7 @@
                 // shell
                 var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
                 ,   materialShell = new THREE.MeshBasicMaterial();
-                materialShell.map = loader.load('temp2/1.png');
+                materialShell.map = loader.load('data/r85/temp2/0.png');
                 materialShell.map.magFilter = THREE.NearestFilter
                 materialShell.transparent = true;
                 materialShell.opacity = setting.opacity;
@@ -236,12 +238,12 @@
                 // preload
                 textures.temp2 = [];
                 for(var i=0; i<180; i++) {
-                    textures.temp2[i] = loader.load(`temp2/${i}.png`);
+                    textures.temp2[i] = loader.load(`data/r85/temp2/${i}.png`);
                     textures.temp2[i].magFilter = THREE.NearestFilter
                 }
                 textures.slp = [];
                 for(var i=0; i<180; i++) {
-                    textures.slp[i] = loader.load(`slp/${i}.png`);
+                    textures.slp[i] = loader.load(`data/r85/slp/${i}.png`);
                     textures.slp[i].magFilter = THREE.NearestFilter
                 }
 
