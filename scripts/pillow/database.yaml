@@ -1,1 +1,5 @@
-name: great
+host: localhost
+port: 3306
+database: some_database
+user: some_user
+password: some_password
