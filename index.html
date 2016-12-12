@@ -124,7 +124,7 @@
             }
         </script>
         <script>
-            var viz = {item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting = {}, three = {};
+            var viz = {dataset: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting1 = {}, three = {};
             function bindDOM() {
                 ctrls.bar = document.getElementById('bar');
 
@@ -145,15 +145,21 @@
                 viz.pos = bar.value;
                 updateViz();
             }
+
             function updateViz() {
                 three.shell.material.map = three.textures[viz.item][viz.pos];
             }
+
+            function changeDataset() {
+                // TODO: destruct dat.gui controller and rebuild
+            }
+
             function playAnime() {
                 var _play = function() {
                     if(viz.pos < viz.length) {
                         ctrls.bar.value = ++viz.pos;
                         updateViz();
-                        viz.timer_id = setTimeout(_play, setting.playSpeed);
+                        viz.timer_id = setTimeout(_play, setting1.playSpeed);
                     } else {
                         stopAnime();
                     }
@@ -183,8 +189,6 @@
                 }).start();
                 
             }
-
-            
 
             function initThree() {
                 var container = document.getElementById('container')
@@ -231,7 +235,7 @@
                 materialShell.map = loader.load('data/r85/temp2/0.png');
                 materialShell.map.magFilter = THREE.NearestFilter
                 materialShell.transparent = true;
-                materialShell.opacity = setting.opacity;
+                materialShell.opacity = setting1.opacity;
                 var shellMesh = new THREE.Mesh(geometryShell, materialShell);
                 scene.add(shellMesh);
 
@@ -281,39 +285,51 @@
                 initThree();
                 bindDOM();
                 animate();
-                document.querySelector('')
             }
             window.addEventListener( 'resize', ()=>three.onResize(), false );
         </script>
 
         <script src="js/dat.gui.min.js"></script>
         <script>
-            setting = {
-                data: 'temp2',
+            var gui0 = new dat.GUI();
+
+            setting1 = {
                 playSpeed: 450,
                 rotationSpeed: 1,
                 opacity: .6,
                 shadow: true
             };
 
-            var gui = new dat.GUI();
+            var gui1 = gui0.addFolder('general')
 
-            gui.add(setting, 'data', ['temp2', 'slp'])
-                .onChange( (v)=>{viz.item=v; updateViz();} );
-
-            gui.add(setting, 'playSpeed', {
+            gui1.add(setting1, 'playSpeed', {
                 slow: 1500, average: 450, fast: 140
             });
-            gui.add(setting, 'rotationSpeed', -25, 25)
+            gui1.add(setting1, 'rotationSpeed', -25, 25)
                 .step(1)
                 .onChange( (v)=>three.orbits.autoRotateSpeed=v);
 
-            gui.add(setting, 'opacity', .0, 1.)
+            gui1.add(setting1, 'opacity', .0, 1.)
                 .onChange( (v)=>three.shell.material.opacity=v )
-            gui.add(setting, 'shadow')
+            gui1.add(setting1, 'shadow')
                 .onChange( (v)=>three.setShadow(v)); // bind to this
 
-            gui.open();
+            gui1.open();
+
+            var setting2 = {
+                dataset: 'r85',
+                item: 'temp2'
+            }
+
+            var gui2 = gui0.addFolder('dataset');
+
+            gui2.add(setting2, 'dataset', ['r85', 'atmos'])
+                .onChange( (v)=>{viz.dataset=v; changeDataset();} );
+
+            gui2.add(setting2, 'item', ['temp2', 'slp'])
+                .onChange( (v)=>{viz.item=v; updateViz();} );
+
+            gui2.open();
         </script>
     </body>
 </html>
