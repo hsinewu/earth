@@ -124,8 +124,8 @@
             }
         </script>
         <script>
-            var viz = {dataset: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting1 = {}, three = {};
-            function bindDOM() {
+            var viz = {name: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting1 = {}, three = {}, dataset = {};
+            function initDOM() {
                 ctrls.bar = document.getElementById('bar');
 
                 var play_ctrl = document.getElementById('play-control'), play_state=true;
@@ -147,11 +147,15 @@
             }
 
             function updateViz() {
-                three.shell.material.map = three.textures[viz.item][viz.pos];
-            }
-
-            function changeDataset() {
-                // TODO: destruct dat.gui controller and rebuild
+                if( viz.pos in three.textures[viz.name][viz.item]) {
+                    three.shell.material.map = three.textures[viz.name][viz.item][viz.pos];
+                } else {
+                    t = three.loader.load(`data/${viz.name}/${viz.item}/${viz.pos}.png`);
+                    // t.magFilter = THREE.NearestFilter
+                    three.shell.material.map =
+                        three.textures[viz.name][viz.item][viz.pos] = t;
+                        
+                }
             }
 
             function playAnime() {
@@ -239,21 +243,28 @@
                 var shellMesh = new THREE.Mesh(geometryShell, materialShell);
                 scene.add(shellMesh);
 
-                // preload
-                textures.temp2 = [];
-                for(var i=0; i<180; i++) {
-                    textures.temp2[i] = loader.load(`data/r85/temp2/${i}.png`);
-                    textures.temp2[i].magFilter = THREE.NearestFilter
+                // init all [name][item] to []
+                for(var name in dataset){
+                    var items = dataset[name].items;
+                    textures[name] = items.reduce(function(o,n) {
+                        o[n] = [];
+                        return o;
+                    }, {});
                 }
-                textures.slp = [];
+                // preload
                 for(var i=0; i<180; i++) {
-                    textures.slp[i] = loader.load(`data/r85/slp/${i}.png`);
-                    textures.slp[i].magFilter = THREE.NearestFilter
+                    textures.r85.temp2[i] = loader.load(`data/r85/temp2/${i}.png`);
+                    textures.r85.temp2[i].magFilter = THREE.NearestFilter
+                }
+                for(var i=0; i<180; i++) {
+                    textures.r85.slp[i] = loader.load(`data/r85/slp/${i}.png`);
+                    textures.r85.slp[i].magFilter = THREE.NearestFilter
                 }
 
                 three.scene = scene;
                 three.camera = camera;
                 three.renderer = renderer;
+                three.loader = loader;
                 three.orbits = orbits;
                 three.earth = earthMesh;
                 three.shell = shellMesh;
@@ -282,54 +293,71 @@
             };
 
             window.onload = function() {
-                initThree();
-                bindDOM();
-                animate();
+                fetch('dataset.json')
+                    .then( (r)=>r.text() )
+                    .then( (t)=>dataset=JSON.parse(t))
+                    .then( function(){
+                        initGui();
+                        initThree();
+                        animate();
+                    })
+                initDOM();
             }
             window.addEventListener( 'resize', ()=>three.onResize(), false );
         </script>
 
         <script src="js/dat.gui.min.js"></script>
         <script>
-            var gui0 = new dat.GUI();
+            function initGui() {
+                var gui0 = new dat.GUI();
 
-            setting1 = {
-                playSpeed: 450,
-                rotationSpeed: 1,
-                opacity: .6,
-                shadow: true
-            };
+                setting1 = {
+                    playSpeed: 450,
+                    rotationSpeed: 1,
+                    opacity: .6,
+                    shadow: true
+                };
 
-            var gui1 = gui0.addFolder('general')
+                var gui1 = gui0.addFolder('general')
 
-            gui1.add(setting1, 'playSpeed', {
-                slow: 1500, average: 450, fast: 140
-            });
-            gui1.add(setting1, 'rotationSpeed', -25, 25)
-                .step(1)
-                .onChange( (v)=>three.orbits.autoRotateSpeed=v);
+                gui1.add(setting1, 'playSpeed', {
+                    slow: 1500, average: 450, fast: 140
+                });
+                gui1.add(setting1, 'rotationSpeed', -25, 25)
+                    .step(1)
+                    .onChange( (v)=>three.orbits.autoRotateSpeed=v);
 
-            gui1.add(setting1, 'opacity', .0, 1.)
-                .onChange( (v)=>three.shell.material.opacity=v )
-            gui1.add(setting1, 'shadow')
-                .onChange( (v)=>three.setShadow(v)); // bind to this
+                gui1.add(setting1, 'opacity', .0, 1.)
+                    .onChange( (v)=>three.shell.material.opacity=v )
+                gui1.add(setting1, 'shadow')
+                    .onChange( (v)=>three.setShadow(v)); // bind to this
 
-            gui1.open();
+                gui1.open();
 
-            var setting2 = {
-                dataset: 'r85',
-                item: 'temp2'
+                var names = Object.keys(dataset);
+                var setting2 = {
+                    name: names[0],
+                    item: dataset[names[0]].items[0]
+                }
+
+                var gui2 = gui0.addFolder('dataset');
+
+                gui2.add(setting2, 'name', names)
+                    .onChange( function changeDataset(v) {
+                        var name = v
+                        ,   length = dataset[v].length
+                        ,   pos = 0
+                        ,   item = dataset[v].items[0]
+                        ,   timer_id = 0;
+                        viz = {name, length, pos, item, timer_id};
+                        updateViz();
+                    });
+
+                gui2.add(setting2, 'item', ['temp2', 'slp'])
+                    .onChange( (v)=>{viz.item=v; updateViz();} );
+
+                gui2.open();
             }
-
-            var gui2 = gui0.addFolder('dataset');
-
-            gui2.add(setting2, 'dataset', ['r85', 'atmos'])
-                .onChange( (v)=>{viz.dataset=v; changeDataset();} );
-
-            gui2.add(setting2, 'item', ['temp2', 'slp'])
-                .onChange( (v)=>{viz.item=v; updateViz();} );
-
-            gui2.open();
         </script>
     </body>
 </html>

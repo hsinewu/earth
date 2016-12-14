@@ -1,0 +1,14 @@
+{
+	"r85": {
+		"length": 180,
+		"items": ["temp2", "slp"]
+	}, 
+	"atmos": {
+		"length": 248,
+		"items": ["olr"]
+	}, 
+	"unknown": {
+		"length": 999,
+		"items": ["mysterious"]
+	}
+}
