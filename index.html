@@ -127,6 +127,7 @@
             var viz = {name: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting1 = {}, three = {}, dataset = {};
             function initDOM() {
                 ctrls.bar = document.getElementById('bar');
+                bar.value = 0;
 
                 var play_ctrl = document.getElementById('play-control'), play_state=true;
                 play_ctrl.onclick = function() {
@@ -151,7 +152,7 @@
                     three.shell.material.map = three.textures[viz.name][viz.item][viz.pos];
                 } else {
                     t = three.loader.load(`data/${viz.name}/${viz.item}/${viz.pos}.png`);
-                    // t.magFilter = THREE.NearestFilter
+                    t.magFilter = THREE.NearestFilter
                     three.shell.material.map =
                         three.textures[viz.name][viz.item][viz.pos] = t;
                         
@@ -344,6 +345,7 @@
 
                 gui2.add(setting2, 'name', names)
                     .onChange( function changeDataset(v) {
+                        // update viz state
                         var name = v
                         ,   length = dataset[v].length
                         ,   pos = 0
@@ -351,6 +353,13 @@
                         ,   timer_id = 0;
                         viz = {name, length, pos, item, timer_id};
                         updateViz();
+                        bar.value = 0;
+
+                        // update drop-down list
+                        gui2.__controllers[1].remove()
+                        setting2.item = item
+                        gui2.add(setting2, 'item', dataset[v].items)
+                            .onChange( (v)=>{viz.item=v; updateViz();} );
                     });
 
                 gui2.add(setting2, 'item', ['temp2', 'slp'])
