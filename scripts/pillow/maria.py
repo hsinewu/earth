@@ -2,26 +2,29 @@ from yaml import load as yaml_load
 from math import sqrt
 import mysql.connector
 import numpy as np
-from palette import pringPng
+from palette import printPng
 
-with open('database.yaml') as f:
-	db_cfg = yaml_load(f.read())
+def printFromDatabase(db_cfg):
+	try:
+		db = mysql.connector.connect(**db_cfg)
+		cursor = db.cursor( buffered=True)
 
-try:
-	print("Connect to database...")
-	db = mysql.connector.connect(**db_cfg)
-	cursor = db.cursor(buffered=True)
-	print("Execute query...")
-	cursor.execute("select olr from %s;")
-	data = cursor.fetchall()
-	w = int( sqrt( len(data)/2))
-	data = np.reshape( data, (w, w*2))
+		print( "Execute query...")
+		elm, tbl = 'olr', ''
+		cursor.execute( "select %s from %s;" % (elm, tbl))
+		data = cursor.fetchall()
+		w = int( sqrt( len(data)/2))
+		data = np.reshape( data, (w, w*2))
 
-	print("Generate png...")
-	printPng( data, "olr.png")
-	db.close()
-	print("Database closed successfully")
+		print( "Generate png...")
+		printPng( data, "olr.png")
+		db.close()
 
-except mysql.connector.Error as err:
-	print("Error occurs upon connection: ")
-	print(err.msg)
+	except mysql.connector.Error as err:
+		print( "Error occurs upon connection: ")
+		print( err.msg)
+
+if __name__ == '__main__':
+	with open('database.yaml') as f:
+		cfg = yaml_load( f.read())
+	printFromDatabase( cfg)
