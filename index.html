@@ -187,6 +187,13 @@
                 var shellMesh = new THREE.Mesh(geometryShell, materialShell);
                 scene.add(shellMesh);
 
+                // galaxy
+                var geometryGalaxy = new THREE.SphereGeometry(900, 32, 32)
+                ,   materialGalaxy = new THREE.MeshBasicMaterial();
+                materialGalaxy.map = loader.load('textures/galaxy.png');
+                materialGalaxy.side = THREE.BackSide;
+                var galaxyMesh = new THREE.Mesh(geometryGalaxy, materialGalaxy);
+                scene.add(galaxyMesh);
                 // init all [name][item] to []
                 for(var name in dataset){
                     var items = dataset[name].items;
