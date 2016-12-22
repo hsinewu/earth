@@ -5,66 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="X-Frame-Options" content="sameorigin"> <!-- meta is not reliable, use http header instead -->
 
-        <link rel="stylesheet" href="css/temperature.css">
+        <link rel="stylesheet" href="css/legend.css">
+        <link rel="stylesheet" href="css/control.css">
         <style>
             body { margin: 0; background-color: #000;}
-            #label{
-                width: 30%;
-                height: 40px;
-                opacity: .6;
-                left: 35%;
-                font-size: 32px;
-                background-color: #666;
-                position: absolute;
-                bottom: 100px;
-                text-align: center;
-                border-radius: 5px;
-
-                display: none;
-            }
-            #label:hover{
-                opacity: 1;
-            }
-            #area-panel{
-                position: absolute;
-                display: flex;
-                justify-content: space-around;  
-                flex-direction: column;
-                width: 150px;
-                height: 200px;
-                color: #fff;
-                top: 10px;
-                left: 10px;
-            }
-            #play-control {
-                position: absolute;
-                left: calc(12.5% - 64px);
-                bottom: calc(7% - 24px);
-                z-index: 2;
-            }
-            #play-control>svg {
-                width: 64px;
-                height: 64px;
-                fill: #fff;
-            }
-            #bar {
-                position: absolute;
-                z-index: 1;
-                left: 12.5%;
-                bottom: 7%;
-                width: 75%;
-            }
-            input[type=range] {
-                background: none;
-                outline: none;
-            }
-            
-            #dash-menu {
-                position: absolute;
-                z-index: 1;
-                right: 5%;
-                top: 5%;
-            }
         </style>
     </head>
     <body>
@@ -83,7 +27,7 @@
             <span>K</span>
         </div>
     </div>
-    <div id="play-control">
+    <div id="playCtrl">
         <svg viewBox="36 0 36 36">
           <path id="pause-icon" d="M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26" />
           <path id="play-icon" d="M47,10 L54,13.74 54,22.25 47,26 M54,13.74 L62,18 62,18 54,22.28" />
@@ -91,27 +35,17 @@
     </div>
     <input type="range" name="" id="bar" min=0 max=180 step=1 value=0 oninput="updateViz({pos: +this.value});">
         <div id="area-panel">
-            <span onclick="setGeoCam(25, 115)">East Aisa</span>
-            <span onclick="setGeoCam(45, -100)">North America</span>
-            <span onclick="setGeoCam(-10, -60)">South America</span>
-            <span onclick="setGeoCam(50, 5)">Europe</span>
-            <span onclick="setGeoCam(15, 15)">Africa</span>
-            <span onclick="setGeoCam(-25, 135)">Australia</span>
+            <span onclick="setGeoCam(25, 115)">  East Aisa     </span>
+            <span onclick="setGeoCam(45, -100)"> North America </span>
+            <span onclick="setGeoCam(-10, -60)"> South America </span>
+            <span onclick="setGeoCam(50, 5)">    Europe        </span>
+            <span onclick="setGeoCam(15, 15)">   Africa        </span>
+            <span onclick="setGeoCam(-25, 135)"> Australia     </span>
         </div>
         <script src="js/Tween.js"></script>
         <script scr="//cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script><script>window.THREE||document.write('<script src="js/three.min.js"><\/script>');</script>
         <script src="js/OrbitControls.js"></script>
         <script>
-            // utils
-            function fillz(num, width) {
-
-                num = +num;
-                num = num.toString();
-                while(num.length < width)
-                    num = '0' + num;
-                return num;
-            }
-
             // angles in degrees
             function sph2cart(radius, theta, phi) {
 
@@ -136,19 +70,18 @@
             }
         </script>
         <script>
-            var viz = {name: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, ctrls = {}, setting1 = {}, three = {}, dataset = {};
+            var viz = {name: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, setting1 = {}, three = {}, dataset = {};
             function initDOM() {
-                ctrls.bar = document.getElementById('bar');
                 bar.value = 0;
 
-                var play_ctrl = document.getElementById('play-control'), play_state=true;
-                play_ctrl.onclick = function() {
+                var play_state=true;
+                playCtrl.onclick = function() {
                     if(play_state) {
                         playAnime();
-                        play_ctrl.children[0].setAttribute('viewBox', '0 0 36 36');
+                        playCtrl.children[0].setAttribute('viewBox', '0 0 36 36');
                     } else {
                         stopAnime();
-                        play_ctrl.children[0].setAttribute('viewBox', '36 0 36 36');
+                        playCtrl.children[0].setAttribute('viewBox', '36 0 36 36');
                     }
                     play_state = !play_state;
                 }
@@ -329,7 +262,7 @@
                     shadow: true
                 };
 
-                var gui1 = gui0.addFolder('general')
+                var gui1 = gui0.addFolder('General')
 
                 gui1.add(setting1, 'playSpeed', {
                     slow: 1500, average: 450, fast: 140
@@ -351,7 +284,7 @@
                     item: dataset[names[0]].items[0]
                 }
 
-                var gui2 = gui0.addFolder('dataset');
+                var gui2 = gui0.addFolder('Dataset');
 
                 gui2.add(setting2, 'name', names)
                     .onChange( function changeDataset(name) {

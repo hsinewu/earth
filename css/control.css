@@ -1,0 +1,50 @@
+#label{
+    width: 30%;
+    height: 40px;
+    opacity: .6;
+    left: 35%;
+    font-size: 32px;
+    background-color: #666;
+    position: absolute;
+    bottom: 100px;
+    text-align: center;
+    border-radius: 5px;
+
+    display: none;
+}
+#label:hover{
+    opacity: 1;
+}
+#area-panel{
+    position: absolute;
+    display: flex;
+    justify-content: space-around;  
+    flex-direction: column;
+    width: 150px;
+    height: 200px;
+    color: #fff;
+    top: 10px;
+    left: 10px;
+}
+#playCtrl {
+    position: absolute;
+    left: calc(12.5% - 64px);
+    bottom: calc(7% - 24px);
+    z-index: 2;
+}
+#playCtrl > svg {
+    width: 64px;
+    height: 64px;
+    fill: #fff;
+}
+#bar {
+    position: absolute;
+    z-index: 1;
+    left: 12.5%;
+    bottom: 7%;
+    width: 75%;
+}
+input[type=range] {
+    background: none;
+    outline: none;
+}
