@@ -15,16 +15,18 @@
     <div id="container"></div>
 
     <div id="label">2016/8/9</div>
-    <div id="legend" class="slp">
-        <div id="legend-text">
-            <span>10 20 30</span>
-            <span>980 990 1000 1010 1020</span>
-            <span>10 20 30</span>
+    <div id="legends" class="temp2">
+        <div class="legend">
+            <div class="legend-text">23 15 5 -5 -10 -20 -30</div>
+            <div class="legend-unit">°C</div>
         </div>
-        <div id="legend-unit">
-            <span>K</span>
-            <span>Pa</span>
-            <span>K</span>
+        <div class="legend">
+            <div class="legend-text">1020 1010 1000 990 980</div>
+            <div class="legend-unit">Pa</div>
+        </div>
+        <div class="legend">
+            <div class="legend-text">295 265 235 205 175 145</div>
+            <div class="legend-unit">K</div>
         </div>
     </div>
     <div id="playCtrl">
@@ -90,6 +92,7 @@
             function updateViz(viz_new) {
                 Object.assign( viz, viz_new);
                 if(viz.pos != bar.value) bar.value = viz.pos;
+                legends.className = viz.item;
 
                 if( viz.pos in three.textures[viz.name][viz.item]) {
                     three.shell.material.map = three.textures[viz.name][viz.item][viz.pos];

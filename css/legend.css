@@ -1,37 +1,48 @@
-.slp {
-	background: linear-gradient(to bottom, #ff4040, #ffa540, #ffff40, #40ff40, #804080, #ff40ff);
-}
-.slp > #legend-text > span:nth-child(2){
-	display: block;
-	line-height: calc( 250px/5);
-}
-.slp > #legend-unit > span:nth-child(2) {
-	display: block;
-}
-
-#legend {
+#legends {
 	position: absolute;
 	width: 22px; height: 250px;
 	bottom: 10%; right: 25px;
 	color: #fff;
 }
-#legend-text {
+#legends.temp2 > .legend:nth-child(1) {
+	display: block;
+}
+#legends.slp > .legend:nth-child(2) {
+	display: block;
+}
+#legends.olr > .legend:nth-child(3) {
+	display: block;
+}
+
+.legend {
+	display: none;
+	width: 100%; height: 100%;
+}
+.legend:nth-child(1) {
+	background: linear-gradient(to top, #fff, #c0c0c0, #4040ff, #40a0ff, #40ffff, #ffff40, #ff8040, #ff4040);
+	line-height: calc( 250px/7);
+}
+.legend:nth-child(2) {
+	background: linear-gradient(to top, #ff4040, #ffa540, #ffff40, #40ff40, #804080, #ff40ff);
+	line-height: calc( 250px/5);
+}
+.legend:nth-child(3) {
+	background: linear-gradient(to top, #a0ffff, #ccffff, #fff143, #ffd634, #ff8434, #ff6600, #e65c00);
+	line-height: calc( 250px/6);
+}
+
+.legend-text {
 	position: absolute;
 	width: 0; height: 100%;
 	left: -40px;
-	line-height: 250px; vertical-align: middle;
+	line-height: inherit; vertical-align: middle;
 
 	font-size: 16px;
 }
-#legend-text > span {
-	display: none;
-}
-#legend-unit {
+.legend-unit {
 	position: absolute;
 	top: -18px; left: -9px;
+	line-height: initial;
 
 	font-size: 12px;
-}
-#legend-unit > span {
-	display: none;
 }
