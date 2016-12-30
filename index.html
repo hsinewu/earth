@@ -183,7 +183,7 @@
                 // shell
                 var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
                 ,   materialShell = new THREE.MeshBasicMaterial();
-                materialShell.map = loader.load('data/r85/temp2/0.png');
+                materialShell.map = loader.load(`data/${viz.name}/${viz.item}/${viz.pos}.png`);
                 materialShell.map.magFilter = THREE.NearestFilter
                 materialShell.transparent = true;
                 materialShell.opacity = setting1.opacity;
@@ -294,16 +294,13 @@
                 gui1.add(setting1, 'shadow')
                     .onChange( (v)=>three.setShadow(v)); // bind to this
 
-                gui1.open();
-
-                var names = Object.keys(dataset);
-                var setting2 = {
-                    name: names[0],
-                    item: dataset[names[0]].items[0]
-                }
+                var names = Object.keys(dataset)
+                ,   name = names.indexOf( reqs.report) > -1? reqs.report: names[0]
+                ,   items = dataset[name].items
+                ,   item = items[0]
+                ,   setting2 = { name, item };
 
                 var gui2 = gui0.addFolder('Dataset');
-
                 gui2.add(setting2, 'name', names)
                     .onChange( function changeDataset(name) {
                         // update viz state
@@ -320,8 +317,11 @@
                             .onChange( (item)=>updateViz({item}) );
                     });
 
-                gui2.add(setting2, 'item', ['temp2', 'slp'])
+                gui2.add(setting2, 'item', items)
                     .onChange( (item)=>updateViz({item}) );
+
+                Object.assign( viz, { name, item})
+                legends.className = item
 
                 gui2.open();
             }
