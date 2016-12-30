@@ -72,7 +72,7 @@
             }
         </script>
         <script>
-            var viz = {name: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, setting1 = {}, three = {}, dataset = {};
+            var viz = {name: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, setting1 = {}, three = {}, dataset = {}, reqs = {};
             function initDOM() {
                 bar.value = 0;
 
@@ -247,6 +247,14 @@
             };
 
             window.onload = function() {
+                var query = window.location.search.substr(1)
+                ,   params = query.split("&");
+                reqs = params
+                    .map( (v)=> v.split('=').map(decodeURIComponent) )
+                    .reduce( function(ac, [k,v]) { 
+                        ac[k] = v;
+                        return ac;
+                    }, {} );
                 fetch('dataset.json')
                     .then( (r)=>r.text() )
                     .then( (t)=>dataset=JSON.parse(t))
