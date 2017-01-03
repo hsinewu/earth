@@ -37,12 +37,12 @@
     </div>
     <input type="range" name="" id="bar" min=0 max=180 step=1 value=0 oninput="updateViz({pos: +this.value});">
         <div id="area-panel">
-            <span onclick="setGeoCam(25, 115)">  East Aisa     </span>
-            <span onclick="setGeoCam(45, -100)"> North America </span>
-            <span onclick="setGeoCam(-10, -60)"> South America </span>
-            <span onclick="setGeoCam(50, 5)">    Europe        </span>
-            <span onclick="setGeoCam(15, 15)">   Africa        </span>
-            <span onclick="setGeoCam(-25, 135)"> Australia     </span>
+            <div onclick="setGeoCam(25,  115)"> East Aisa     </div>
+            <div onclick="setGeoCam(45, -100)"> North America </div>
+            <div onclick="setGeoCam(-10, -60)"> South America </div>
+            <div onclick="setGeoCam(50,    5)"> Europe        </div>
+            <div onclick="setGeoCam(15,   15)"> Africa        </div>
+            <div onclick="setGeoCam(-25, 135)"> Australia     </div>
         </div>
         <script src="js/Tween.js"></script>
         <script scr="//cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script><script>window.THREE||document.write('<script src="js/three.min.js"><\/script>');</script>
@@ -297,7 +297,7 @@
                 var names = Object.keys(dataset)
                 ,   name = names.indexOf( reqs.report) > -1? reqs.report: names[0]
                 ,   items = dataset[name].items
-                ,   item = items[0]
+                ,   item = items.indexOf( reqs.variable) > -1? reqs.variable: items[0]
                 ,   setting2 = { name, item };
 
                 var gui2 = gui0.addFolder('Dataset');

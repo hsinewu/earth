@@ -17,17 +17,13 @@
 }
 #area-panel {
     position: absolute;
-    display: flex;
-    justify-content: space-around;  
-    flex-direction: column;
-    width: 150px;
-    height: 200px;
+    line-height: 30px;
     color: #fff;
     top: 10px;
     left: 10px;
     user-select: none;
 }
-#area-panel > span:hover {
+#area-panel > div:hover {
     cursor: pointer;
     color: #c00;
 }
