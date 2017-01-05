@@ -7,12 +7,7 @@ import numpy as np
 colorFile = 'heatColor.json'
 # outputSize = (512,256)
 
-# read color data
-with open(colorFile) as f:
-	colorTable = json_loads(f.read())
-
-# draw png in palette mode with pillow
-def printPng(space, fileName, transform=lambda x:x):
+def printPng(space, colorTable, ofn, transform=lambda x:x):
 	# map datas to indices according to colorTable
 	vfunc = np.vectorize(lambda x: bisect_left( colorTable['stops'], transform(x) ) )
 	arr = vfunc(space)
@@ -22,15 +17,16 @@ def printPng(space, fileName, transform=lambda x:x):
 
 	if 'outputSize' in globals():
 		im = im.resize(outputSize)
-	im.save(fileName)
+	im.save(ofn)
 
 if __name__ == '__main__':
-	ncFile = 'r85.nc'
-	vizItem = 'temp2'
-	outputFile = '_scale.png'
+	ncFile = 'file.nc'
+	items = ['var1', 'var2']
 
-	# read netcdf
-	with netcdf_file(ncFile, 'r') as f:
-		data = f.variables[vizItem] # (time, lat, lon)
-
-	printPng(data[0], outputFile, lambda x: x-273.15)
+	with netcdf_file(ncFile, 'r') as f1:
+		for item in items:
+			vari3 = f1.variables[item]
+			with open('json/%s.json'%item) as f2:
+				color = json_loads(f2.read())
+			for i in range(181):
+				printPng( vari3[i], color, '%s/%d.png'%(item,i))

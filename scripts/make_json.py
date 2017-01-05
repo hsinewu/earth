@@ -1,19 +1,25 @@
 import numpy as np
 import json
+from os.path import exists
 
-def printJson(data, name):
-	stops = [ np.percentile(data, x) for x in [20, 40, 60, 80]]
+def printJson(vari, ofn):
+	if exists(ofn):
+		return print("%s file exist"%ofn)
+
+	stops = [ np.percentile(vari, x) for x in [20, 40, 60, 80]]
 	palette = np.repeat( [0, 63, 127, 191, 255], 3)
 
 	obj = {'stops': stops, 'palette': palette.tolist()}
-	with open( '%s.json'%name, 'x') as f:
+	with open( ofn, 'x') as f:
 		txt = json.dumps(obj)
 		f.write(txt)
 
 if __name__ == '__main__':
-	fileName = 'file.nc'
-	item = 'var'
+	ifn = 'file.nc'
+	items = ['var1', 'var2']
+
 	from scipy.io.netcdf import netcdf_file
-	with netcdf_file( fileName, 'r') as f:
-		data = f.variables[item]
-		printJson(data[:], item)
+	with netcdf_file( ifn, 'r') as f:
+		for itm in items:
+			data = f.variables[itm]
+			printJson(data[:], itm+'.json')
