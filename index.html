@@ -72,7 +72,9 @@
             }
         </script>
         <script>
-            var viz = {name: 'r85', item: 'temp2', pos: 0, length: 180, timer_id: 0}, setting1 = {}, three = {}, dataset = {}, reqs = {};
+            var viz = {name: 'r85', item: 'temp2', pos: 0, timer_id: 0}
+            ,   dataset = {names: ['r85'], items:['temp2','slp','slm', 'ws', 'tsw', 'qvi']}
+            ,   setting1 = {}, three = {}, reqs = {};
             function initDOM() {
                 bar.value = 0;
 
@@ -94,9 +96,12 @@
                 if(viz.pos != bar.value) bar.value = viz.pos;
                 legends.className = viz.item;
 
-                if( viz.pos in three.textures[viz.name][viz.item]) {
+                if( three.textures[viz.name][viz.item][viz.pos] ) {
+
                     three.shell.material.map = three.textures[viz.name][viz.item][viz.pos];
+
                 } else {
+
                     t = three.loader.load(`data/${viz.name}/${viz.item}/${viz.pos}.png`);
                     t.magFilter = THREE.NearestFilter
                     three.shell.material.map =
@@ -107,7 +112,7 @@
 
             function playAnime() {
                 var _play = function() {
-                    if(viz.pos < viz.length) {
+                    if(viz.pos < 181) {
                         var timer_id = setTimeout(_play, setting1.playSpeed)
                         ,   pos = viz.pos + 1;
                         updateViz({pos, timer_id});
@@ -198,8 +203,8 @@
                 var galaxyMesh = new THREE.Mesh(geometryGalaxy, materialGalaxy);
                 scene.add(galaxyMesh);
                 // init all [name][item] to []
-                for(var name in dataset){
-                    var items = dataset[name].items;
+                for(var name of dataset.names){
+                    var items = dataset.items;
                     textures[name] = items.reduce(function(o,n) {
                         o[n] = [];
                         return o;
@@ -255,15 +260,11 @@
                         ac[k] = v;
                         return ac;
                     }, {} );
-                fetch('dataset.json')
-                    .then( (r)=>r.text() )
-                    .then( (t)=>dataset=JSON.parse(t))
-                    .then( function(){
-                        initGui();
-                        initThree();
-                        animate();
-                    })
+
                 initDOM();
+                initGui();
+                initThree();
+                animate();
             }
             window.addEventListener( 'resize', ()=>three.onResize(), false );
         </script>
@@ -294,33 +295,24 @@
                 gui1.add(setting1, 'shadow')
                     .onChange( (v)=>three.setShadow(v)); // bind to this
 
-                var names = Object.keys(dataset)
+                var names = dataset.names
                 ,   name = names.indexOf( reqs.report) > -1? reqs.report: names[0]
-                ,   items = dataset[name].items
+                ,   items = dataset.items
                 ,   item = items.indexOf( reqs.variable) > -1? reqs.variable: items[0]
                 ,   setting2 = { name, item };
 
                 var gui2 = gui0.addFolder('Dataset');
                 gui2.add(setting2, 'name', names)
                     .onChange( function changeDataset(name) {
-                        // update viz state
-                        var length = dataset[name].length
-                        ,   pos = 0
-                        ,   item = dataset[name].items[0]
+                        var pos = 0
                         ,   timer_id = 0;
-                        updateViz({name, length, pos, item, timer_id});
-
-                        // update drop-down list
-                        gui2.__controllers[1].remove()
-                        setting2.item = item
-                        gui2.add(setting2, 'item', dataset[name].items)
-                            .onChange( (item)=>updateViz({item}) );
+                        updateViz({name, pos, timer_id});
                     });
 
                 gui2.add(setting2, 'item', items)
                     .onChange( (item)=>updateViz({item}) );
 
-                Object.assign( viz, { name, item})
+                Object.assign( viz, { name, item})  // Three isn't ready, don't updateViz
                 legends.className = item
 
                 gui2.open();
