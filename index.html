@@ -81,10 +81,10 @@
                 var play_state=true;
                 playCtrl.onclick = function() {
                     if(play_state) {
-                        playAnime();
+                        forwardPlay();
                         playCtrl.children[0].setAttribute('viewBox', '0 0 36 36');
                     } else {
-                        stopAnime();
+                        stopPlay();
                         playCtrl.children[0].setAttribute('viewBox', '36 0 36 36');
                     }
                     play_state = !play_state;
@@ -110,19 +110,19 @@
                 }
             }
 
-            function playAnime() {
-                var _play = function() {
-                    if(viz.pos < 181) {
-                        var timer_id = setTimeout(_play, setting1.playSpeed)
-                        ,   pos = viz.pos + 1;
-                        updateViz({pos, timer_id});
-                    } else {
-                        stopAnime();
-                    }
+            function forwardPlay() {
+
+                if(viz.pos < 180) {
+                    var timer_id = setTimeout(forwardPlay, setting1.playSpeed)
+                    ,   pos = viz.pos + 1;
+                    updateViz({pos, timer_id});
+                } else {
+                    stopPlay();
                 }
-                _play();
+
             }
-            function stopAnime() {
+
+            function stopPlay() {
                 clearInterval(viz.timer_id);
             }
 
@@ -174,7 +174,7 @@
                 scene.add( ambientLight );
 
                 // earth
-                var geometry = new THREE.SphereGeometry(5, 32, 32)
+                var geometry = new THREE.SphereGeometry(5, 128, 128)
                 ,   material = new THREE.MeshPhongMaterial();
                 material.map = loader.load('textures/earthmap1k.jpg');
                 material.bumpMap = loader.load('textures/earthbump1k.jpg');
@@ -186,7 +186,7 @@
                 scene.add(earthMesh);
 
                 // shell
-                var geometryShell = new THREE.SphereGeometry(5.001, 32, 32)
+                var geometryShell = new THREE.SphereGeometry(5.001, 128, 128)
                 ,   materialShell = new THREE.MeshBasicMaterial();
                 materialShell.map = loader.load(`data/${viz.name}/${viz.item}/${viz.pos}.png`);
                 materialShell.map.magFilter = THREE.NearestFilter
@@ -196,7 +196,7 @@
                 scene.add(shellMesh);
 
                 // galaxy
-                var geometryGalaxy = new THREE.SphereGeometry(900, 32, 32)
+                var geometryGalaxy = new THREE.SphereGeometry(900, 128, 128)
                 ,   materialGalaxy = new THREE.MeshBasicMaterial();
                 materialGalaxy.map = loader.load('textures/galaxy.png');
                 materialGalaxy.side = THREE.BackSide;
