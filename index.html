@@ -96,18 +96,7 @@
                 if(viz.pos != bar.value) bar.value = viz.pos;
                 legends.className = viz.item;
 
-                if( three.textures[viz.name][viz.item][viz.pos] ) {
-
-                    three.shell.material.map = three.textures[viz.name][viz.item][viz.pos];
-
-                } else {
-
-                    t = three.loader.load(`data/${viz.name}/${viz.item}/${viz.pos}.png`);
-                    t.magFilter = THREE.NearestFilter
-                    three.shell.material.map =
-                        three.textures[viz.name][viz.item][viz.pos] = t;
-                        
-                }
+                three.load(viz.name, viz.item, viz.pos)
             }
 
             function forwardPlay() {
@@ -202,32 +191,11 @@
                 materialGalaxy.side = THREE.BackSide;
                 var galaxyMesh = new THREE.Mesh(geometryGalaxy, materialGalaxy);
                 scene.add(galaxyMesh);
-                // init all [name][item] to []
-                for(var name of dataset.names){
-                    var items = dataset.items;
-                    textures[name] = items.reduce(function(o,n) {
-                        o[n] = [];
-                        return o;
-                    }, {});
-                }
-                // preload
-                for(var i=0; i<180; i++) {
-                    textures.r85.temp2[i] = loader.load(`data/r85/temp2/${i}.png`);
-                    textures.r85.temp2[i].magFilter = THREE.NearestFilter
-                }
-                for(var i=0; i<180; i++) {
-                    textures.r85.slp[i] = loader.load(`data/r85/slp/${i}.png`);
-                    textures.r85.slp[i].magFilter = THREE.NearestFilter
-                }
 
                 three.scene = scene;
                 three.camera = camera;
                 three.renderer = renderer;
-                three.loader = loader;
                 three.orbits = orbits;
-                three.earth = earthMesh;
-                three.shell = shellMesh;
-                three.textures = textures;
                 three.render = ()=>renderer.render(three.scene, three.camera);
                 three.onResize = function() {
                     camera.aspect = window.innerWidth / window.innerHeight;
@@ -238,6 +206,21 @@
                 three.setShadow = function(on) {
                     directLight.intensity  = +on;
                     ambientLight.intensity =+!on +.3;
+                }
+                three.load = function(name, item, pos) {
+                    var hash = name + item + pos
+                    if(!textures[hash]) {
+                        textures[hash] = loader.load(`data/${name}/${item}/${pos}.png`)
+                        textures[hash].magFilter = THREE.NearestFilter
+                    }
+                    materialShell.map = textures[hash]
+
+                    // preload test?
+                    var hash2 = name + item + (pos+1)
+                    if(!textures[hash2]) {
+                        textures[hash2] = loader.load(`data/${name}/${item}/${pos+1}.png`)
+                        textures[hash2].magFilter = THREE.NearestFilter
+                    }
                 }
             }
 
@@ -288,12 +271,12 @@
                 });
                 gui1.add(setting1, 'rotationSpeed', -25, 25)
                     .step(1)
-                    .onChange( (v)=>three.orbits.autoRotateSpeed=v);
+                    .onChange( v =>three.orbits.autoRotateSpeed=v );
 
                 gui1.add(setting1, 'opacity', .0, 1.)
-                    .onChange( (v)=>three.shell.material.opacity=v )
+                    .onChange( v =>three.shell.material.opacity=v );
                 gui1.add(setting1, 'shadow')
-                    .onChange( (v)=>three.setShadow(v)); // bind to this
+                    .onChange( v =>three.setShadow(v) ); // bind to this
 
                 var names = dataset.names
                 ,   name = names.indexOf( reqs.report) > -1? reqs.report: names[0]
@@ -310,7 +293,7 @@
                     });
 
                 gui2.add(setting2, 'item', items)
-                    .onChange( (item)=>updateViz({item}) );
+                    .onChange( item =>updateViz({item}) );
 
                 Object.assign( viz, { name, item})  // Three isn't ready, don't updateViz
                 legends.className = item
