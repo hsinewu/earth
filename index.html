@@ -75,16 +75,18 @@
             var viz = {name: 'r85', item: 'temp2', pos: 0, timer_id: 0}
             ,   dataset = {names: ['r85'], items:['temp2','slp','slm', 'ws', 'tsw', 'qvi']}
             ,   setting1 = {}, three = {}, reqs = {};
+
             function initDOM() {
                 bar.value = 0;
 
                 var play_state=true;
                 playCtrl.onclick = function() {
+                    if(viz.pos==180) return;
                     if(play_state) {
                         forwardPlay();
                         playCtrl.children[0].setAttribute('viewBox', '0 0 36 36');
                     } else {
-                        stopPlay();
+                        clearInterval(viz.timer_id);
                         playCtrl.children[0].setAttribute('viewBox', '36 0 36 36');
                     }
                     play_state = !play_state;
@@ -106,20 +108,13 @@
                     ,   pos = viz.pos + 1;
                     updateViz({pos, timer_id});
                 } else {
-                    stopPlay();
+                    // stopPlay
+                    clearInterval(viz.timer_id);
                 }
 
             }
 
-            function stopPlay() {
-                clearInterval(viz.timer_id);
-            }
-
-            function setGeoCam( lat, lng) {
-
-                setSphereCam( lng+90, 90-lat);
-
-            }
+            var setGeoCam = (lat, lng) => setSphereCam( lng+90, 90-lat)
 
             function setSphereCam( theta, phi) {
 
@@ -192,11 +187,11 @@
                 var galaxyMesh = new THREE.Mesh(geometryGalaxy, materialGalaxy);
                 scene.add(galaxyMesh);
 
-                three.scene = scene;
                 three.camera = camera;
-                three.renderer = renderer;
-                three.orbits = orbits;
-                three.render = ()=>renderer.render(three.scene, three.camera);
+                three.update = function(){
+                    renderer.render(scene, camera);
+                    orbits.update();
+                }
                 three.onResize = function() {
                     camera.aspect = window.innerWidth / window.innerHeight;
                     camera.updateProjectionMatrix();
@@ -222,27 +217,34 @@
                         textures[hash2].magFilter = THREE.NearestFilter
                     }
                 }
+                three.__defineSetter__('opacity', v => materialShell.opacity=v )
+                three.__defineGetter__('opacity', ()=> materialShell.opacity )
+                three.__defineSetter__('autoRotateSpeed', v => orbits.autoRotateSpeed=v )
+                three.__defineGetter__('autoRotateSpeed', ()=> orbits.autoRotateSpeed )
             }
 
             function animate() {
 
                 requestAnimationFrame( animate );
 
-                three.render();
+                three.update();
                 TWEEN.update();
-                three.orbits.update();
 
             };
 
-            window.onload = function() {
+            function parseRequest() {
                 var query = window.location.search.substr(1)
                 ,   params = query.split("&");
-                reqs = params
+                return params
                     .map( (v)=> v.split('=').map(decodeURIComponent) )
                     .reduce( function(ac, [k,v]) { 
                         ac[k] = v;
                         return ac;
                     }, {} );
+            }
+            
+            window.onload = function() {
+                reqs = parseRequest()
 
                 initDOM();
                 initGui();
@@ -271,10 +273,10 @@
                 });
                 gui1.add(setting1, 'rotationSpeed', -25, 25)
                     .step(1)
-                    .onChange( v =>three.orbits.autoRotateSpeed=v );
+                    .onChange( v =>three.autoRotateSpeed=v );
 
                 gui1.add(setting1, 'opacity', .0, 1.)
-                    .onChange( v =>three.shell.material.opacity=v );
+                    .onChange( v =>three.opacity=v );
                 gui1.add(setting1, 'shadow')
                     .onChange( v =>three.setShadow(v) ); // bind to this
 
