@@ -17,7 +17,7 @@
     <div id="label">2016/8/9</div>
     <div id="legends" class="temp2">
         <div class="legend">
-            <div class="legend-text">23 15 5 -5 -10 -20 -30</div>
+            <div class="legend-text">25 15 5 -5 -15 -25 -35</div>
             <div class="legend-unit">°C</div>
         </div>
         <div class="legend">
@@ -70,10 +70,33 @@
                     };
                 }
             }
+
+            function datetime(y, m, d, h) {
+                if( y<1e3) console.log('year < 1000 not handled')
+                var yyyy = '' + y
+                var [mm, dd, hh] = [m,d,h].map(function(x) {
+                    x = '0' + x
+                    return x.length > 2? x.slice(1) : x
+                })
+                return yyyy + mm + dd + hh
+            }
+
+            // or yyyymmddhh
+            function deltaHour(yyyymmdd, dh=0) {
+                // var yyyy = yyyymmdd.substring(0, 4)
+                // ,   mm = yyyymmdd.substring(4, 6)
+                // ,   dd = yyyymmdd.substring(6, 8)
+                // ,   d = new Date(`${yyyy} ${mm} ${dd}`)
+                var [_, yyyy, mm, dd] = /(\d{4})(\d{2})(\d{2})/.exec(yyyymmdd)
+                ,   d = new Date(`${yyyy} ${mm} ${dd}`)
+                d.setHours( d.getHours() + dh)
+                return datetime( d.getFullYear(), d.getMonth()+1, d.getDate(), d.getHours() )
+            }
+
         </script>
         <script>
-            var viz = {name: 'r85', item: 'temp2', pos: 0, timer_id: 0}
-            ,   dataset = {names: ['r85'], items:['temp2','slp','slm', 'ws', 'tsw', 'qvi']}
+            var viz = {name: '2016120100', item: 'temp2', pos: 0, timer_id: 0}
+            ,   dataset = {names: ['2016120100', '2016120200', '2016120300', '2016120400', '2016120500', '2016120600', '2016120700', '2016120800', '2016120900', '2016121000'], items:['aprs', 'slm', 'tsw', 'slp', 'precip', 'temp2', 'ws', 'qvi', 'disch', 'seaice', 'sn']}
             ,   setting1 = {}, three = {}, reqs = {};
 
             function initDOM() {
@@ -172,7 +195,7 @@
                 // shell
                 var geometryShell = new THREE.SphereGeometry(5.001, 128, 128)
                 ,   materialShell = new THREE.MeshBasicMaterial();
-                materialShell.map = loader.load(`data/${viz.name}/${viz.item}/${viz.pos}.png`);
+                materialShell.map = loader.load(`data/${viz.name}/${viz.item}/${viz.name}.png`);
                 materialShell.map.magFilter = THREE.NearestFilter
                 materialShell.transparent = true;
                 materialShell.opacity = setting1.opacity;
@@ -203,17 +226,19 @@
                     ambientLight.intensity =+!on +.3;
                 }
                 three.load = function(name, item, pos) {
+                    var dt = deltaHour(name, pos*6)
                     var hash = name + item + pos
                     if(!textures[hash]) {
-                        textures[hash] = loader.load(`data/${name}/${item}/${pos}.png`)
+                        textures[hash] = loader.load(`data/${name}/${item}/${dt}.png`)
                         textures[hash].magFilter = THREE.NearestFilter
                     }
                     materialShell.map = textures[hash]
 
                     // preload test?
+                    var dt2 = deltaHour(name, pos*6+6)
                     var hash2 = name + item + (pos+1)
                     if(!textures[hash2]) {
-                        textures[hash2] = loader.load(`data/${name}/${item}/${pos+1}.png`)
+                        textures[hash2] = loader.load(`data/${name}/${item}/${dt2}.png`)
                         textures[hash2].magFilter = THREE.NearestFilter
                     }
                 }
@@ -233,7 +258,7 @@
             };
 
             function parseRequest() {
-                var query = window.location.search.substr(1)
+                var query = location.search.substr(1)
                 ,   params = query.split("&");
                 return params
                     .map( (v)=> v.split('=').map(decodeURIComponent) )
@@ -278,7 +303,7 @@
                 gui1.add(setting1, 'opacity', .0, 1.)
                     .onChange( v =>three.opacity=v );
                 gui1.add(setting1, 'shadow')
-                    .onChange( v =>three.setShadow(v) ); // bind to this
+                    .onChange( v =>three.setShadow(v) );
 
                 var names = dataset.names
                 ,   name = names.indexOf( reqs.report) > -1? reqs.report: names[0]
@@ -288,7 +313,7 @@
 
                 var gui2 = gui0.addFolder('Dataset');
                 gui2.add(setting2, 'name', names)
-                    .onChange( function changeDataset(name) {
+                    .onChange( name => {
                         var pos = 0
                         ,   timer_id = 0;
                         updateViz({name, pos, timer_id});
