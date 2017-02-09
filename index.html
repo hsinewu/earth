@@ -1,4 +1,4 @@
-<html>
+<html manifest="app.appcache">
     <head>
         <title>🌎</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -14,7 +14,7 @@
     <body>
     <div id="container"></div>
 
-    <div id="label">2016/8/9</div>
+    <div id="label">2016120100</div>
     <div id="legends" class="temp2">
         <div class="legend">
             <div class="legend-text">25 15 5 -5 -15 -25 -35</div>
@@ -233,6 +233,7 @@
                         textures[hash].magFilter = THREE.NearestFilter
                     }
                     materialShell.map = textures[hash]
+                    label.textContent = dt
 
                     // preload test?
                     var dt2 = deltaHour(name, pos*6+6)
