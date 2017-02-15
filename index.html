@@ -83,19 +83,33 @@
 
             // or yyyymmddhh
             function deltaHour(yyyymmdd, dh=0) {
-                // var yyyy = yyyymmdd.substring(0, 4)
-                // ,   mm = yyyymmdd.substring(4, 6)
-                // ,   dd = yyyymmdd.substring(6, 8)
-                // ,   d = new Date(`${yyyy} ${mm} ${dd}`)
                 var [_, yyyy, mm, dd] = /(\d{4})(\d{2})(\d{2})/.exec(yyyymmdd)
                 ,   d = new Date(`${yyyy} ${mm} ${dd}`)
                 d.setHours( d.getHours() + dh)
                 return datetime( d.getFullYear(), d.getMonth()+1, d.getDate(), d.getHours() )
             }
 
+            // function forecast45(y, m, d) {
+            //     var date = new Date(`${y} ${m} ${d}`)
+            //     ,   a = []
+            //     for(var i=0; i<45; i++) {
+            //         var str = datetime( date.getFullYear(), date.getMonth()+1, date.getDate(), 0)
+            //         a.unshift(str)
+            //         date.setDate( date.getDate() - 1)
+            //     }
+            //     return a
+            // }
+
+            // assume 16/12/01~10 && d != 10
+            function forecast_dummy(d) {
+                var str = '201612', a = []
+                for(var i=1; i<=d; i++)
+                    a.push(str+'0'+i)
+                return a
+            }
         </script>
         <script>
-            var viz = {name: '2016120100', item: 'temp2', pos: 0, timer_id: 0}
+            var viz = {name: '2016120100', item: 'temp2', pos: 0, timer_id: 0, type: 'dataset', date: '',dates: [], max: 180}
             ,   dataset = {names: ['2016120100', '2016120200', '2016120300', '2016120400', '2016120500', '2016120600', '2016120700', '2016120800', '2016120900', '2016121000'], items:['aprs', 'slm', 'tsw', 'slp', 'precip', 'temp2', 'ws', 'qvi', 'disch', 'seaice', 'sn']}
             ,   setting1 = {}, three = {}, reqs = {};
 
@@ -104,34 +118,45 @@
 
                 var play_state=true;
                 playCtrl.onclick = function() {
-                    if(viz.pos==180) return;
-                    if(play_state) {
-                        forwardPlay();
-                        playCtrl.children[0].setAttribute('viewBox', '0 0 36 36');
-                    } else {
-                        clearInterval(viz.timer_id);
-                        playCtrl.children[0].setAttribute('viewBox', '36 0 36 36');
-                    }
+                    if(viz.pos >= viz.max) return;
+                    forwardPlay(play_state);
+                    // if(play_state) {
+                    //     forwardPlay();
+                    //     playCtrl.children[0].setAttribute('viewBox', '0 0 36 36');
+                    // } else {
+                    //     clearInterval(viz.timer_id);
+                    //     playCtrl.children[0].setAttribute('viewBox', '36 0 36 36');
+                    // }
                     play_state = !play_state;
                 }
             }
 
             function updateViz(viz_new) {
+                // TODO: Fix viz.type, restore from forecast to dataset
                 Object.assign( viz, viz_new);
                 if(viz.pos != bar.value) bar.value = viz.pos;
+                if(viz.max != bar.max) bar.max = viz.max;
                 legends.className = viz.item;
 
-                three.load(viz.name, viz.item, viz.pos)
+                if(viz.type == 'dataset') {
+                    three.load(viz.name, viz.item, viz.pos);
+                } else {
+                    var name = viz.dates[~~(viz.pos/4)] + '00'  // WARN: check forecast function
+                    ,   ymdh = deltaHour(viz.date, viz.pos%4*6);
+                    three.loadByDate(name, viz.item, ymdh);
+                }
             }
 
-            function forwardPlay() {
+            function forwardPlay(on) {
 
-                if(viz.pos < 180) {
-                    var timer_id = setTimeout(forwardPlay, setting1.playSpeed)
+                if(on && viz.pos < viz.max) {
+                    var timer_id = setTimeout( ()=>{forwardPlay(true)}, setting1.playSpeed)
                     ,   pos = viz.pos + 1;
                     updateViz({pos, timer_id});
+                    playCtrl.children[0].setAttribute('viewBox', '0 0 36 36');
                 } else {
                     // stopPlay
+                    playCtrl.children[0].setAttribute('viewBox', '36 0 36 36');
                     clearInterval(viz.timer_id);
                 }
 
@@ -226,22 +251,33 @@
                     ambientLight.intensity =+!on +.3;
                 }
                 three.load = function(name, item, pos) {
-                    var dt = deltaHour(name, pos*6)
-                    var hash = name + item + pos
+                    // TODO: reuse loadByDate
+                    var ymdh = deltaHour(name, pos*6)
+                    var hash = name + item + ymdh
                     if(!textures[hash]) {
-                        textures[hash] = loader.load(`data/${name}/${item}/${dt}.png`)
+                        textures[hash] = loader.load(`data/${name}/${item}/${ymdh}.png`)
                         textures[hash].magFilter = THREE.NearestFilter
                     }
                     materialShell.map = textures[hash]
-                    label.textContent = dt
+                    label.textContent = hash
 
                     // preload test?
-                    var dt2 = deltaHour(name, pos*6+6)
-                    var hash2 = name + item + (pos+1)
+                    var ymdh2 = deltaHour(name, pos*6+6)
+                    var hash2 = name + item + ymdh2
                     if(!textures[hash2]) {
-                        textures[hash2] = loader.load(`data/${name}/${item}/${dt2}.png`)
+                        textures[hash2] = loader.load(`data/${name}/${item}/${ymdh2}.png`)
                         textures[hash2].magFilter = THREE.NearestFilter
                     }
+                }
+                three.loadByDate = function(name, item, ymdh) {
+                    var hash = name + item + ymdh;
+                    if(!textures[hash]) {
+                        textures[hash] = loader.load(`data/${name}/${item}/${ymdh}.png`)
+                        textures[hash].magFilter = THREE.NearestFilter
+                    }
+                    materialShell.map = textures[hash]
+                    label.textContent = hash
+                    return textures[hash];
                 }
                 three.__defineSetter__('opacity', v => materialShell.opacity=v )
                 three.__defineGetter__('opacity', ()=> materialShell.opacity )
@@ -312,7 +348,8 @@
                 ,   item = items.indexOf( reqs.variable) > -1? reqs.variable: items[0]
                 ,   setting2 = { name, item };
 
-                var gui2 = gui0.addFolder('Dataset');
+                // TODO: refactoring UI
+                var gui2 = gui0.addFolder('View by Dataset');
                 gui2.add(setting2, 'name', names)
                     .onChange( name => {
                         var pos = 0
@@ -327,6 +364,16 @@
                 legends.className = item
 
                 gui2.open();
+
+                var setting3 = {date: '20161208'}
+                var gui3 = gui0.addFolder('View by Forecast')
+                gui3.add(setting3, 'date', ['20161208', '20161209'])
+                    .onChange( d => {
+                        var dates = forecast_dummy(9)   // TODO: apply parameter
+                        ,   date = d;
+                        updateViz({date, dates, type: 'forecast', max: dates.length*4 - 1});
+                    })
+                gui3.open();
             }
         </script>
     </body>

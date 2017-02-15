@@ -41,4 +41,8 @@
 input[type=range] {
     background: none;
     outline: none;
+    opacity: .4;
+}
+input[type=range]:hover {
+    opacity: 1;
 }
