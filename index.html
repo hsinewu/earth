@@ -114,7 +114,7 @@
             }
         </script>
         <script>
-            var viz = {name: '2016120100', item: 'temp2', pos: 0, timer_id: 0, type: 'dataset', date: '',dates: [], max: 180}
+            var viz = {date: '2016120100', item: 'temp2', pos: 0, timer_id: 0, type: 'dataset', dates: [], get max(){ return (viz.type == 'dataset'? 180: viz.dates.length*4-1)}}
             ,   dataset = {names: ['2016120100', '2016120200', '2016120300', '2016120400', '2016120500', '2016120600', '2016120700', '2016120800', '2016120900', '2016121000'], items:['aprs', 'slm', 'tsw', 'slp', 'precip', 'temp2', 'ws', 'qvi', 'disch', 'seaice', 'sn']}
             ,   setting1 = {}, three = {}, reqs = {};
 
@@ -126,17 +126,17 @@
                 legends.className = viz.item;
 
                 if(viz.type == 'dataset') {
-                    var ymdh = deltaHour(viz.name, viz.pos*6)
-                    three.map = three.testLoad(viz.name, viz.item, ymdh);
-                    label.textContent = `${viz.name}: ${ymdh}`
+                    var ymdh = deltaHour(viz.date, viz.pos*6)
+                    three.map = three.testLoad(viz.date, viz.item, ymdh);
+                    label.textContent = `${viz.date}: ${ymdh}`
 
-                    var ymdh2 = deltaHour(viz.name, viz.pos*6+6)
-                    three.testLoad(viz.name, viz.item, ymdh2)   // preload
+                    var ymdh2 = deltaHour(viz.date, viz.pos*6+6)
+                    three.testLoad(viz.date, viz.item, ymdh2)   // preload
                 } else {
-                    var name = viz.dates[~~(viz.pos/4)] + '00'  // WARN: check forecast function
+                    var date = viz.dates[~~(viz.pos/4)] + '00'  // WARN: check forecast function
                     ,   ymdh = deltaHour(viz.date, viz.pos%4*6);
-                    three.map = three.testLoad(name, viz.item, ymdh);
-                    label.textContent = `${name}:  ${ymdh}`
+                    three.map = three.testLoad(date, viz.item, ymdh);
+                    label.textContent = `${date}:  ${ymdh}`
                 }
             }
 
@@ -212,7 +212,7 @@
                 // shell
                 var geometryShell = new THREE.SphereGeometry(5.001, 128, 128)
                 ,   materialShell = new THREE.MeshBasicMaterial();
-                materialShell.map = loader.load(`data/${viz.name}/${viz.item}/${viz.name}.png`);
+                materialShell.map = loader.load(`data/${viz.date}/${viz.item}/${viz.date}.png`);
                 materialShell.map.magFilter = THREE.NearestFilter
                 materialShell.transparent = true;
                 materialShell.opacity = setting1.opacity;
@@ -242,10 +242,10 @@
                     directLight.intensity  = +on;
                     ambientLight.intensity =+!on +.3;
                 }
-                three.testLoad = function(name, item, ymdh) {
-                    var hash = name + item + ymdh;
+                three.testLoad = function(date, item, ymdh) {
+                    var hash = date + item + ymdh;
                     if(!textures[hash]) {
-                        textures[hash] = loader.load(`data/${name}/${item}/${ymdh}.png`)
+                        textures[hash] = loader.load(`data/${date}/${item}/${ymdh}.png`)
                         textures[hash].magFilter = THREE.NearestFilter
                     }
                     return textures[hash];
@@ -304,7 +304,7 @@
                     shadow: true
                 };
 
-                var gui1 = gui0.addFolder('General')
+                var gui1 = gui0.addFolder('Effect')
 
                 gui1.add(setting1, 'playSpeed', {
                     slow: 1500, average: 450, fast: 140
@@ -319,40 +319,34 @@
                     .onChange( v =>three.setShadow(v) );
 
                 var names = dataset.names
-                ,   name = names.indexOf( reqs.report) > -1? reqs.report: names[0]
+                ,   date = names.indexOf( reqs.report) > -1? reqs.report: names[0]
+                ,   dates = forecast_dummy( +date.slice(-4, -2) )
                 ,   items = dataset.items
                 ,   item = items.indexOf( reqs.variable) > -1? reqs.variable: items[0]
-                ,   setting2 = { name, item };
+                ,   view = 'dataset'
+                ,   setting2 = { date, item, view };
 
-                // TODO: refactoring UI
-                var gui2 = gui0.addFolder('View by Dataset');
+                var gui2 = gui0.addFolder('Target');
 
-                gui2.add(setting2, 'name', names)
-                    .onChange( name => {
-                        var pos = 0
-                        ,   timer_id = 0
-                        ,   type = 'dataset'
-                        ,   max = 180;
-                        updateViz({name, pos, timer_id, type, max});
+                gui2.add(setting2, 'view', ['dataset', 'forecast'])
+                    .onChange( type => {
+                        updateViz({ type, pos: 0 })
+                    });
+                
+                gui2.add(setting2, 'date', names)
+                    .onChange( date => {
+                        var dates = forecast_dummy( +date.slice(-4, -2) );
+                        updateViz({date, dates});
                     });
 
-                gui2.add(setting2, 'item', items)
+                gui2.add(setting2, 'item', items)   // TODO: reuse viz
                     .onChange( item =>updateViz({item}) );
 
-                Object.assign( viz, { name, item})  // Three isn't ready, don't updateViz
+                Object.assign( viz, { date, dates, item })  // Three isn't ready, don't updateViz
                 legends.className = item
 
                 gui2.open();
 
-                var setting3 = {date: '20161201--'}
-                gui3 = gui0.addFolder('View by Forecast')
-                gui3.add(setting3, 'date', ['20161201--', '20161202--', '20161203--', '20161204--', '20161205--', '20161206--', '20161207--', '20161208--', '20161209--'])
-                    .onChange( d => {
-                        var dates = forecast_dummy(+d.slice(-4, -2))
-                        ,   date = d;
-                        updateViz({date, dates, type: 'forecast', pos:0, max: dates.length*4 - 1});
-                    })
-                gui3.open();
             }
         </script>
     </body>
