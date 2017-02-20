@@ -1,12 +1,17 @@
 #label {
     position: absolute;
-    width: 100%;
+    width: auto;
     color: rgba(255,255,255,0.4);
     bottom: 100px;
+    left: 50%;
+    transform: translate(-50%);
     font-size: 32px;
-    text-align: center;
+    padding: 7px;
     user-select: none;
     cursor: default;
+}
+#label:hover {
+    color: #fff;
 }
 #area-panel {
     position: absolute;
@@ -24,7 +29,8 @@
     position: absolute;
     left: calc(12.5% - 64px);
     bottom: calc(7% - 24px);
-    z-index: 2;
+    z-index: 1;
+    cursor: pointer;
 }
 #playCtrl > svg {
     width: 64px;
@@ -41,7 +47,7 @@
 input[type=range] {
     background: none;
     outline: none;
-    opacity: .4;
+    opacity: .6;
 }
 input[type=range]:hover {
     opacity: 1;
