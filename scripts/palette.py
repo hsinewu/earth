@@ -27,23 +27,49 @@ if __name__ == '__main__':
 	from json import loads
 	from os import makedirs
 	from os.path import exists
-	
-	items = ['temp2', 'slp', 'aprs', 'slm', 'tsw', 'precip', 'ws', 'qvi', 'disch', 'seaice', 'sn']
 
-	for m, d in [ (x, y) for x in [12] for y in range(1,11) ]:
+	import argparse
+	argp = argparse.ArgumentParser()
+	argp.add_argument('-i', '--items', nargs='+', default=['temp2'])
+	argp.add_argument('-m', '--months', nargs='+', type=int, default=[12])
+	argp.add_argument('-d', '--dates', nargs='+', type=int, default=range(1,11))
+	argp.add_argument('-f', '--force', dest='force', action='store_true')
+	argp.add_argument('-v', '--verbose', dest='verbose', action='store_true')
+	argp.set_defaults(verbose=False, force=False)
+	argp.add_argument('-l', '--length', type=int, default=181)
+	args = argp.parse_args()
+	import logging as log
+	if args.verbose:
+		log.basicConfig(format="%(levelname)s: %(message)s", level=log.DEBUG)
+	
+	for m, d in [ (x, y) for x in args.months for y in args.dates ]:
 		ifn = '2016%02d%02d00.nc' % (m, d)
-		if exists(ifn[:-3]): # .nc
-			print("Folder exists, skip")
-			continue
-		makedirs(ifn[:-3])
+		dir1 = ifn[:-3]
+		if exists(dir1): # .nc
+			if not args.force:
+				log.warn("Folder %s exists, skipped" % dir1)
+				continue
+		else:
+			log.info("Creating %s" % dir1)
+			makedirs(dir1)
+		log.info("Write to %s" % dir1)
 
 		with netcdf_file(ifn, 'r') as f1:
-			for item in items:
-				print("%s/%s"%(ifn[:-3], item))
-				makedirs("%s/%s"%(ifn[:-3], item))
+			for item in args.items:
+				dir2 = "%s/%s"%(dir1, item)
+				if exists(dir2):
+					if not args.force:
+						log.warn("Sub folder %s exists, skipped" % dir2)
+						continue
+				else:
+					log.info("Creating %s" % dir2)
+					makedirs(dir2)
+				log.info("Write to %s" % dir2)
 				vari3 = f1.variables[item]
-				with open('json/%s.json'%item) as f2:
+				json1 = 'json/%s.json'%item
+				json1 = json1 if exists(json1) else 'json/_%s.json'%item
+				with open(json1) as f2:
 					color = loads(f2.read())
-				for i in range(181):
-					ofn = '%s/%s/%s.png' % ( ifn[:-3], item, timeStr(2016, m, d, i*6))
+				for i in range(args.length):
+					ofn = '%s/%s/%s.png' % ( dir1, item, timeStr(2016, m, d, i*6))
 					printPng( vari3[i], color, ofn)

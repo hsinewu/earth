@@ -22,4 +22,4 @@ if __name__ == '__main__':
 	with netcdf_file( ifn, 'r') as f:
 		for itm in items:
 			data = f.variables[itm]
-			printJson(data[:], itm+'.json')
+			printJson(data[:], '_'+itm+'.json')
