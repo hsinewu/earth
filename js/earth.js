@@ -62,9 +62,22 @@ function forecast_dummy(d) {
     return a
 }
 
+function parseRequest() {
+    var query = location.search.substr(1)
+    ,   params = query.split("&");
+    return params
+        .map( (v)=> v.split('=').map(decodeURIComponent) )
+        .reduce( function(ac, [k,v]) { 
+            ac[k] = v;
+            return ac;
+        }, {} );
+}
+// functions above are pure
+
 var viz = {date: '2016120100', item: 'temp2', pos: 0, timer_id: 0, type: 'dataset', dates: [], get max(){ return (viz.type == 'dataset'? 180: viz.dates.length*4-1)}}
-,   dataset = {names: ['2016120100', '2016120200', '2016120300', '2016120400', '2016120500', '2016120600', '2016120700', '2016120800', '2016120900', '2016121000'], items:['aprs', 'slm', 'tsw', 'slp', 'precip', 'temp2', 'ws', 'qvi', 'disch', 'seaice', 'sn']}
-,   setting1 = {}, three = {}, reqs = {};
+var dataset = {names: ['2016120100', '2016120200', '2016120300', '2016120400', '2016120500', '2016120600', '2016120700', '2016120800', '2016120900', '2016121000']
+,   items:['aprs', 'slm', 'tsw', 'slp', 'precip', 'temp2', 'ws', 'qvi', 'disch', 'seaice', 'sn']}
+var setting1 = {}, three = {}, reqs = {};
 
 function updateViz(viz_new) {
     // TODO: Fix viz.type, restore from forecast to dataset
@@ -177,8 +190,9 @@ function initThree() {
 
     three.camera = camera;
     three.update = function(){
-        renderer.render(scene, camera);
         orbits.update();
+        TWEEN.update();
+        renderer.render(scene, camera);
     }
     three.onResize = function() {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -206,26 +220,6 @@ function initThree() {
     three.__defineGetter__('autoRotateSpeed', ()=> orbits.autoRotateSpeed )
 }
 
-function animate() {
-
-    requestAnimationFrame( animate );
-
-    three.update();
-    TWEEN.update();
-
-};
-
-function parseRequest() {
-    var query = location.search.substr(1)
-    ,   params = query.split("&");
-    return params
-        .map( (v)=> v.split('=').map(decodeURIComponent) )
-        .reduce( function(ac, [k,v]) { 
-            ac[k] = v;
-            return ac;
-        }, {} );
-}
-
 window.onload = function() {
     reqs = parseRequest()
     bar.value = 0;
@@ -235,9 +229,14 @@ window.onload = function() {
     
     initGui();
     initThree();
+    window.addEventListener( 'resize', ()=>three.onResize(), false );
+    
+    var animate = ()=>{
+        requestAnimationFrame( animate );
+        three.update();
+    }
     animate();
 }
-window.addEventListener( 'resize', ()=>three.onResize(), false );
 
 function initGui() {
     var gui0 = new dat.GUI();
@@ -268,7 +267,7 @@ function initGui() {
     ,   dates = forecast_dummy( +date.slice(-4, -2) )
     ,   items = dataset.items
     ,   item = items.indexOf( reqs.variable) > -1? reqs.variable: items[0]
-    ,   view = 'dataset'
+    ,   view = reqs.view || 'dataset'
     ,   setting2 = { date, item, view };
 
     var gui2 = gui0.addFolder('Target');
@@ -287,7 +286,7 @@ function initGui() {
     gui2.add(setting2, 'item', items)   // TODO: reuse viz
         .onChange( item =>updateViz({item}) );
 
-    Object.assign( viz, { date, dates, item })  // Three isn't ready, don't updateViz
+    Object.assign( viz, { date, dates, item, type:view })  // Three isn't ready, don't updateViz
     legends.className = item
 
     gui2.open();
