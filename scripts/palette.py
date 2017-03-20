@@ -21,6 +21,42 @@ def timeStr(y, m, d, h=0):
 	dh = datetime.timedelta(hours=1)
 	return (d0+dh*h).strftime("%Y%m%d%H")
 
+def batchPng(opt, dh=6):
+	import logging as log
+	if opt.verbose:
+		log.basicConfig(format="%(levelname)s: %(message)s", level=log.DEBUG)
+	
+	for m, d in [ (x, y) for x in opt.months for y in opt.dates ]:
+		ifn = '2016%02d%02d00.nc' % (m, d)
+		dir1 = ifn[:-3]
+		if exists(dir1): # .nc
+			if not opt.force:
+				log.warn("Folder %s exists, skipped" % dir1)
+				continue
+		else:
+			log.info("Creating %s" % dir1)
+			makedirs(dir1)
+		log.info("Write to %s" % dir1)
+
+		with netcdf_file(ifn, 'r') as f1:
+			for item in opt.items:
+				dir2 = "%s/%s"%(dir1, item)
+				if exists(dir2):
+					if not opt.force:
+						log.warn("Sub folder %s exists, skipped" % dir2)
+						continue
+				else:
+					log.info("Creating %s" % dir2)
+					makedirs(dir2)
+				log.info("Write to %s" % dir2)
+				vari3 = f1.variables[item]
+				json1 = 'json/%s.json'%item
+				json1 = json1 if exists(json1) else 'json/_%s.json'%item
+				with open(json1) as f2:
+					color = loads(f2.read())
+				for i in range(opt.length):
+					ofn = '%s/%s/%s.png' % ( dir1, item, timeStr(2016, m, d, i*dh))
+					printPng( vari3[i], color, ofn)
 
 if __name__ == '__main__':
 	from scipy.io.netcdf import netcdf_file
@@ -38,38 +74,4 @@ if __name__ == '__main__':
 	argp.set_defaults(verbose=False, force=False)
 	argp.add_argument('-l', '--length', type=int, default=181)
 	args = argp.parse_args()
-	import logging as log
-	if args.verbose:
-		log.basicConfig(format="%(levelname)s: %(message)s", level=log.DEBUG)
-	
-	for m, d in [ (x, y) for x in args.months for y in args.dates ]:
-		ifn = '2016%02d%02d00.nc' % (m, d)
-		dir1 = ifn[:-3]
-		if exists(dir1): # .nc
-			if not args.force:
-				log.warn("Folder %s exists, skipped" % dir1)
-				continue
-		else:
-			log.info("Creating %s" % dir1)
-			makedirs(dir1)
-		log.info("Write to %s" % dir1)
-
-		with netcdf_file(ifn, 'r') as f1:
-			for item in args.items:
-				dir2 = "%s/%s"%(dir1, item)
-				if exists(dir2):
-					if not args.force:
-						log.warn("Sub folder %s exists, skipped" % dir2)
-						continue
-				else:
-					log.info("Creating %s" % dir2)
-					makedirs(dir2)
-				log.info("Write to %s" % dir2)
-				vari3 = f1.variables[item]
-				json1 = 'json/%s.json'%item
-				json1 = json1 if exists(json1) else 'json/_%s.json'%item
-				with open(json1) as f2:
-					color = loads(f2.read())
-				for i in range(args.length):
-					ofn = '%s/%s/%s.png' % ( dir1, item, timeStr(2016, m, d, i*6))
-					printPng( vari3[i], color, ofn)
+	batchPng(args)
