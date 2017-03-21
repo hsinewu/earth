@@ -78,6 +78,7 @@ var viz = {date: '2016120100', item: 'temp2', pos: 0, timer_id: 0, type: 'datase
 var dataset = {names: ['2016120100', '2016120200', '2016120300', '2016120400', '2016120500', '2016120600', '2016120700', '2016120800', '2016120900', '2016121000']
 ,   items:['aprs', 'slm', 'tsw', 'slp', 'precip', 'temp2', 'ws', 'qvi', 'disch', 'seaice', 'sn']}
 var setting1 = {}, three = {}, reqs = {};
+var ROOTDIR = 'data';
 
 function updateViz(viz_new) {
     // TODO: Fix viz.type, restore from forecast to dataset
@@ -173,7 +174,7 @@ function initThree() {
     // shell
     var geometryShell = new THREE.SphereGeometry(5.001, 128, 128)
     ,   materialShell = new THREE.MeshBasicMaterial();
-    materialShell.map = loader.load(`data/${viz.date}/${viz.item}/${viz.date}.png`);
+    materialShell.map = loader.load(`${ROOTDIR}/${viz.date}/${viz.item}/${viz.date}.png`);
     materialShell.map.magFilter = THREE.NearestFilter
     materialShell.transparent = true;
     materialShell.opacity = setting1.opacity;
@@ -207,7 +208,7 @@ function initThree() {
     three.testLoad = function(date, item, ymdh) {
         var hash = date + item + ymdh;
         if(!textures[hash]) {
-            textures[hash] = loader.load(`data/${date}/${item}/${ymdh}.png`)
+            textures[hash] = loader.load(`${ROOTDIR}/${date}/${item}/${ymdh}.png`)
             textures[hash].magFilter = THREE.NearestFilter
         }
         return textures[hash];
@@ -226,6 +227,9 @@ window.onload = function() {
 
     var on = 0;
     playCtrl.onclick = ()=>{switchPlay(on=!on)}
+
+    if(reqs.hash)
+        ROOTDIR = 'hash/' + reqs.hash;
     
     initGui();
     initThree();
