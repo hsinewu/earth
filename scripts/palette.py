@@ -21,34 +21,31 @@ def timeStr(y, m, d, h=0):
 	dh = datetime.timedelta(hours=1)
 	return (d0+dh*h).strftime("%Y%m%d%H")
 
+def mkdir(dp, force):
+	if exists(dp): # .nc
+		if not force:
+			log.warn("Folder %s exists, skipped" % dp)
+			return 1
+	else:
+		log.info("Creating %s" % dp)
+		makedirs(dp)
+	log.info("Write to %s" % dp)
+
 def batchPng(opt, dh=6):
-	import logging as log
 	if opt.verbose:
 		log.basicConfig(format="%(levelname)s: %(message)s", level=log.DEBUG)
 	
 	for m, d in [ (x, y) for x in opt.months for y in opt.dates ]:
 		ifn = '2016%02d%02d00.nc' % (m, d)
 		dir1 = ifn[:-3]
-		if exists(dir1): # .nc
-			if not opt.force:
-				log.warn("Folder %s exists, skipped" % dir1)
-				continue
-		else:
-			log.info("Creating %s" % dir1)
-			makedirs(dir1)
-		log.info("Write to %s" % dir1)
+		if mkdir(dir1, opt.force): # .nc
+			continue
 
 		with netcdf_file(ifn, 'r') as f1:
 			for item in opt.items:
 				dir2 = "%s/%s"%(dir1, item)
-				if exists(dir2):
-					if not opt.force:
-						log.warn("Sub folder %s exists, skipped" % dir2)
-						continue
-				else:
-					log.info("Creating %s" % dir2)
-					makedirs(dir2)
-				log.info("Write to %s" % dir2)
+				if mkdir(dir2, opt.force):
+					continue
 				vari3 = f1.variables[item]
 				json1 = 'json/%s.json'%item
 				json1 = json1 if exists(json1) else 'json/_%s.json'%item
@@ -63,6 +60,7 @@ if __name__ == '__main__':
 	from json import loads
 	from os import makedirs
 	from os.path import exists
+	import logging as log
 
 	import argparse
 	argp = argparse.ArgumentParser()
