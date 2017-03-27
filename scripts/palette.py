@@ -37,11 +37,11 @@ def batchPng(opt, dh=6):
 	
 	for m, d in [ (x, y) for x in opt.months for y in opt.dates ]:
 		ifn = '2016%02d%02d00.nc' % (m, d)
-		dir1 = ifn[:-3]
+		dir1 = opt.dest + '/' + ifn[:-3]
 		if mkdir(dir1, opt.force): # .nc
 			continue
 
-		with netcdf_file(ifn, 'r') as f1:
+		with netcdf_file(opt.src+'/'+ifn, 'r') as f1:
 			for item in opt.items:
 				dir2 = "%s/%s"%(dir1, item)
 				if mkdir(dir2, opt.force):
@@ -71,5 +71,7 @@ if __name__ == '__main__':
 	argp.add_argument('-v', '--verbose', dest='verbose', action='store_true')
 	argp.set_defaults(verbose=False, force=False)
 	argp.add_argument('-l', '--length', type=int, default=181)
+	argp.add_argument('--src', default='.')
+	argp.add_argument('--dest', default='.')
 	args = argp.parse_args()
 	batchPng(args)
