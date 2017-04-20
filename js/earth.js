@@ -75,13 +75,11 @@ function parseRequest() {
 // functions above are pure
 
 var viz = {date: '2016120100', item: 'temp2', pos: 0, timer_id: 0, type: 'dataset', dates: [], get max(){ return (viz.type == 'dataset'? 180: viz.dates.length*4-1)}}
-var dataset = {names: ['2016120100', '2016120200', '2016120300', '2016120400', '2016120500', '2016120600', '2016120700', '2016120800', '2016120900', '2016121000']
-,   items:['aprs', 'slm', 'tsw', 'slp', 'precip', 'temp2', 'ws', 'qvi', 'disch', 'seaice', 'sn']}
+var schema = {names: [], items:[]}
 var setting1 = {}, three = {}, reqs = {};
 var ROOTDIR = 'data';
 
 function updateViz(viz_new) {
-    // TODO: Fix viz.type, restore from forecast to dataset
     Object.assign( viz, viz_new);
     if(viz.pos != bar.value) bar.value = viz.pos;
     if(viz.max != bar.max) bar.max = viz.max;
@@ -221,7 +219,7 @@ function initThree() {
     three.__defineGetter__('autoRotateSpeed', ()=> orbits.autoRotateSpeed )
 }
 
-window.onload = function() {
+window.onload = async () => {
     reqs = parseRequest()
     bar.value = 0;
 
@@ -230,6 +228,10 @@ window.onload = function() {
 
     if(reqs.hash)
         ROOTDIR = 'hash/' + reqs.hash;
+    
+    var resp = await fetch(`${ROOTDIR}/dataset.json`)
+    var json = await resp.json();
+    schema = json;
     
     initGui();
     initThree();
@@ -266,10 +268,10 @@ function initGui() {
     gui1.add(setting1, 'shadow')
         .onChange( v =>three.setShadow(v) );
 
-    var names = dataset.names
+    var names = schema.names
     ,   date = names.indexOf( reqs.report) > -1? reqs.report: names[0]
     ,   dates = forecast_dummy( +date.slice(-4, -2) )
-    ,   items = dataset.items
+    ,   items = schema.items
     ,   item = items.indexOf( reqs.variable) > -1? reqs.variable: items[0]
     ,   view = reqs.view || 'dataset'
     ,   setting2 = { date, item, view };
