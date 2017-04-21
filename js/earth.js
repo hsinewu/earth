@@ -32,7 +32,7 @@ function datetime(y, m, d, h) {
 }
 
 // or yyyymmddhh
-function deltaHour(yyyymmdd, dh=0) {
+function deltaHour(yyyymmdd, dh) {
     var [_, yyyy, mm, dd] = /(\d{4})(\d{2})(\d{2})/.exec(yyyymmdd)
     ,   d = new Date(`${yyyy} ${mm} ${dd}`)
     d.setHours( d.getHours() + dh)
@@ -74,9 +74,8 @@ function parseRequest() {
 }
 // functions above are pure
 
-var viz = {date: '2016120100', item: 'temp2', pos: 0, timer_id: 0, type: 'dataset', dates: [], get max(){ return (viz.type == 'dataset'? 180: viz.dates.length*4-1)}}
-var schema = {names: [], items:[]}
-var setting1 = {}, three = {}, reqs = {};
+var viz = {date: '', item: '', pos: 0, timer_id: 0, type: '', dates: [], get max(){ return (viz.type == 'dataset'? 180: viz.dates.length*4-1)}}
+var schema, setting1, three, reqs
 var ROOTDIR = 'data';
 
 function updateViz(viz_new) {
@@ -86,15 +85,15 @@ function updateViz(viz_new) {
     legends.className = viz.item;
 
     if(viz.type == 'dataset') {
-        var ymdh = deltaHour(viz.date, viz.pos*6)
+        var ymdh = deltaHour(viz.date, viz.pos * schema.dh)
         three.map = three.testLoad(viz.date, viz.item, ymdh);
         label.textContent = `${viz.date}: ${ymdh}`
 
-        var ymdh2 = deltaHour(viz.date, viz.pos*6+6)
+        var ymdh2 = deltaHour(viz.date, (viz.pos+1) * schema.dh)
         three.testLoad(viz.date, viz.item, ymdh2)   // preload
     } else {
-        var date = viz.dates[~~(viz.pos/4)] + '00'  // WARN: check forecast function
-        ,   ymdh = deltaHour(viz.date, viz.pos%4*6);
+        var date = viz.dates[~~(viz.pos/(24/schema.dh))] + '00'  // WARN: check forecast function
+        ,   ymdh = deltaHour(viz.date, viz.pos%(24/schema.dh) * schema.dh);   // WARN: assume dh to be a factor of 24
         three.map = three.testLoad(date, viz.item, ymdh);
         label.textContent = `${date}:  ${ymdh}`
     }
@@ -131,6 +130,7 @@ function setSphereCam( theta, phi) {
 }
 
 function initThree() {
+    three = {}
     var container = document.getElementById('container')
     ,   loader = new THREE.TextureLoader()
     ,   textures={};
