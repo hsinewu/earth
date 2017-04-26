@@ -51,7 +51,7 @@ def batchPng(opt, dh=6):
 				json1 = json1 if exists(json1) else 'json/_%s.json'%item
 				with open(json1) as f2:
 					color = loads(f2.read())
-				for i in range(opt.length):
+				for i in range(opt.length or len(vari3[:])):
 					ofn = '%s/%s/%s.png' % ( dir1, item, timeStr(2016, m, d, i*dh))
 					printPng( vari3[i], color, ofn)
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	argp.add_argument('-f', '--force', dest='force', action='store_true')
 	argp.add_argument('-v', '--verbose', dest='verbose', action='store_true')
 	argp.set_defaults(verbose=False, force=False)
-	argp.add_argument('-l', '--length', type=int, default=181)
+	argp.add_argument('-l', '--length', type=int, default=0)
 	argp.add_argument('--src', default='.')
 	argp.add_argument('--dest', default='.')
 	args = argp.parse_args()
