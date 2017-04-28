@@ -38,10 +38,13 @@ def printFile(nc, m, d, dh, items, dir1, force=False):
 			if mkdir(dir2, force):
 				continue
 			vari3 = f1.variables[item]
-			json1 = 'json/%s.json'%item
-			json1 = json1 if exists(json1) else 'json/_%s.json'%item
-			with open(json1) as f2:
-				color = loads(f2.read())
+			json1 = 'json/%s.json' % item
+			if exists(json1):
+				with open(json1) as f2:
+					color = loads(f2.read())
+			else:
+					from make_json import parseColor
+					color = parseColor(vari3[:])
 			for i in range(len(vari3[:])):
 				ofn = '%s/%s/%s.png' % ( dir1, item, timeStr(2016, m, d, i*dh))
 				printPng( vari3[i], color, ofn)
