@@ -15,9 +15,9 @@ def printPng(space, colorTable, ofn, outputSize=None):
 		im = im.resize(outputSize)
 	im.save(ofn)
 
-def timeStr(y, m, d, h=0):
+def timeStr(tstr, h=0):
 	import datetime
-	d0 = datetime.datetime(y, m, d)
+	d0 = datetime.datetime.strptime(tstr, '%Y%m%d%H')
 	dh = datetime.timedelta(hours=1)
 	return (d0+dh*h).strftime("%Y%m%d%H")
 
@@ -31,10 +31,11 @@ def mkdir(dp, force):
 		makedirs(dp)
 	log.info("Write to %s" % dp)
 
-def printFile(nc, m, d, dh, items, dir1, force=False):
+def printFile(ncdir, tstr, dh, items, outdir, force=False):
+	nc = '%s/%s.nc' % (ncdir, tstr)
 	with netcdf_file(nc, 'r') as f1:
 		for item in items:
-			dir2 = "%s/%s"%(dir1, item)
+			dir2 = "%s/%s/%s"%(outdir, tstr, item)
 			if mkdir(dir2, force):
 				continue
 			vari3 = f1.variables[item]
@@ -46,10 +47,11 @@ def printFile(nc, m, d, dh, items, dir1, force=False):
 					from make_json import parseColor
 					color = parseColor(vari3[:])
 			for i in range(len(vari3[:])):
-				ofn = '%s/%s/%s.png' % ( dir1, item, timeStr(2016, m, d, i*dh))
+				ofn = '%s/%s.png' % ( dir2, timeStr(tstr, i*dh))
 				printPng( vari3[i], color, ofn)
 
 def batchPng(opt, dh=6):
+	# TODO: adapt to cli option change
 	if opt.verbose:
 		log.basicConfig(format="%(levelname)s: %(message)s", level=log.DEBUG)
 	
@@ -70,12 +72,13 @@ if __name__ == '__main__':
 	import argparse
 	argp = argparse.ArgumentParser()
 	argp.add_argument('-i', '--items', nargs='+', default=['temp2'])
-	argp.add_argument('-m', '--months', nargs='+', type=int, default=[12])
-	argp.add_argument('-d', '--dates', nargs='+', type=int, default=range(1,11))
+	argp.add_argument('-t', '--time', default='2016120100')
+	# argp.add_argument('-d', '--dates', nargs='+', type=int, default=[1])
+	argp.add_argument('-d', '--dhour', type=int, default=6)
 	argp.add_argument('-f', '--force', dest='force', action='store_true')
 	argp.add_argument('-v', '--verbose', dest='verbose', action='store_true')
 	argp.set_defaults(verbose=False, force=False)
 	argp.add_argument('--src', default='.')
 	argp.add_argument('--dest', default='.')
 	args = argp.parse_args()
-	batchPng(args)
+	printFile(args.src, args.time, args.dhour, args.items, args.dest, args.force)
