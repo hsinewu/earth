@@ -74,7 +74,7 @@ function parseRequest() {
 }
 // functions above are pure
 
-var viz = {date: '', item: '', pos: 0, timer_id: 0, type: '', dates: [], get max(){ return (viz.type == 'dataset'? 180: viz.dates.length*4-1)}}
+var viz = {date: '', item: '', pos: 0, timer_id: 0, type: '', dates: [], get max(){ return (viz.type == 'dataset'? schema.length-1: viz.dates.length*4-1)}}
 var schema, setting1, three, reqs
 var ROOTDIR = 'data';
 
