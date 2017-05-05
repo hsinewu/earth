@@ -1,11 +1,35 @@
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $len = $_POST['length'];
+    $vars = $_POST['vars'];
+    $vars = array_map('trim', str_getcsv($vars));
+    $wsv = implode(" ", $vars);
+    $dh = $_POST['interval'];
+    $date = $_POST['date'];
+    $date = str_replace('-', '', $date)."00";
+    $file = $_FILES['nc']['tmp_name'];
+    $hash = uniqid();
+
+    mkdir("_nc/${hash}", 0777, true);
+    move_uploaded_file($file, "_nc/${hash}/${date}.nc");
+    system("cd scripts && python palette.py --time ${date} --dhour ${dh} --items ${wsv} -f --src ../_nc/${hash} --dest ../hash/${hash}");
+    $schema = ['names' => [$date], 'items' => $vars, 'dh' => $dh, 'length' => $len];
+    $json = fopen("hash/${hash}/dataset.json", "w");
+    fwrite($json, json_encode($schema));
+    fclose($json);
+    header("Location: index.html?hash=${hash}");
+    die();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en"><head>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Upload netcdf</title>
   <!-- bootstrap -->
-  <link rel="stylesheet" href="css/bootstrap.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <script src="js/bootstrap.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <script src="js/bootstrap.js"></script>
 </head>
 <body>
   <div class="container">
@@ -37,18 +61,5 @@
     </form>
   </div>
   </div>
-
-</body></html>
-
-<?php
-if ($_SERVER['REQUEST_METHOD'] === 'GET')
-  exit();
-    $len = $_POST['length'];
-    $vars = $_POST['vars'];
-    $vars = array_map('trim', str_getcsv($vars));
-    $wsv = implode(" ", $vars);
-    $dh = $_POST['interval'];
-    $date = $_POST['date'];
-    $date = str_replace('-', '', $date)."00";
-    $schema = ['names' => [$date], 'items' => $vars, 'dh' => $dh, 'length' => $len];
-    var_dump($schema);
+</body>
+</html>
