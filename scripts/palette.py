@@ -31,24 +31,27 @@ def mkdir(dp, force):
 		makedirs(dp)
 	log.info("Write to %s" % dp)
 
-def printFile(ncdir, tstr, dh, items, outdir, force=False):
+def printSource(source, tstr, dh, items, outdir, force=False):
+	for item in items:
+		dir2 = "%s/%s/%s"%(outdir, tstr, item)
+		if mkdir(dir2, force):
+			continue
+		vari3 = source[item]
+		json1 = 'json/%s.json' % item
+		if exists(json1):
+			with open(json1) as f2:
+				color = loads(f2.read())
+		else:
+				from make_json import parseColor
+				color = parseColor(vari3[:])
+		for i in range(len(vari3[:])):
+			ofn = '%s/%s.png' % ( dir2, timeStr(tstr, i*dh))
+			printPng( vari3[i], color, ofn)
+
+def printFile(ncdir, tstr, *args):
 	nc = '%s/%s.nc' % (ncdir, tstr)
 	with netcdf_file(nc, 'r') as f1:
-		for item in items:
-			dir2 = "%s/%s/%s"%(outdir, tstr, item)
-			if mkdir(dir2, force):
-				continue
-			vari3 = f1.variables[item]
-			json1 = 'json/%s.json' % item
-			if exists(json1):
-				with open(json1) as f2:
-					color = loads(f2.read())
-			else:
-					from make_json import parseColor
-					color = parseColor(vari3[:])
-			for i in range(len(vari3[:])):
-				ofn = '%s/%s.png' % ( dir2, timeStr(tstr, i*dh))
-				printPng( vari3[i], color, ofn)
+		printSource(f1.variables, tstr, *args)
 
 def batchPng(opt, dh=6):
 	# TODO: adapt to cli option change
