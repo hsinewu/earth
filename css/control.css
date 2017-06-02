@@ -52,3 +52,21 @@ input[type=range] {
 input[type=range]:hover {
     opacity: 1;
 }
+body.loading > :not(.progress) {
+    filter: blur(5px);
+}
+body.loading > .progress {
+    opacity: 1;
+}
+.progress {
+    opacity: 0;
+    transition: opacity 2s;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, .8);
+    border-radius: 7px;
+    text-align: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}

@@ -242,6 +242,7 @@ window.onload = async () => {
         three.update();
     }
     animate();
+    document.body.classList.remove('loading')
 }
 
 function initGui() {
