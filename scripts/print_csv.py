@@ -4,15 +4,15 @@ import numpy as np
 from palette import printPng
 
 if __name__ == '__main__':
-  import argparse
-  argp = argparse.ArgumentParser()
-  argp.add_argument('--json')
-  argp.add_argument('input')
-  args = argp.parse_args()
+  import sys
 
-  name = args.input
-  data = np.array(list(csv.reader(open(name))))
+  name = sys.argv[2]
+  with open(name) as f:
+    data = f.read().split('\n')
+    data = [ x.split(' ') for x in data]
+    print( [len(data), len(data[0])])
+    data = np.array(data)
   data = data.astype(np.float)
   
-  color = json.loads(open(args.json).read())
+  color = json.loads(open( sys.argv[1] ).read())
   printPng(data, color, name + '.png')
