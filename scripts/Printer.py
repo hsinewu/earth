@@ -9,6 +9,7 @@ import numpy as np
 class Printer:
   def __init__(self):
     self.outputSize = None
+    self.outdir = '.'
     self.color = None
 
   def setcolor(self, json):
@@ -38,20 +39,18 @@ class Printer:
   def __mkdir__(self, dp, force):
     if exists(dp): # .nc
       if not force:
-        print("Folder %s exists, skipped" % dp)
+        print("Skip existing folder %s, use -f" % dp)
         return 1
     else:
       makedirs(dp)
 
-  def printsource(self, source, tstr, dh, items, outdir, force=False):
-    # printer = Printer()
-    for item in items:
-      dir2 = "%s/%s/%s"%(outdir, tstr, item)
+  def printgrids(self, grids, tstr, dh, force=False):
+    for item, vari in grids.items():
+      dir2 = "%s/%s/%s" % (self.outdir, tstr, item)
       if self.__mkdir__(dir2, force):
         continue
-      vari3 = source[item]
       json1 = 'json/%s.json' % item
       self.setcolor( json1)
-      for i in range(len(vari3[:])):
+      for i in range(len(vari)):
         ofn = '%s/%s.png' % ( dir2, self.__timestr__(tstr, i*dh))
-        self.printpng( vari3[i], ofn)
+        self.printpng( vari[i], ofn)

@@ -2,7 +2,7 @@ from yaml import load as yaml_load
 from math import sqrt
 import mysql.connector
 import numpy as np
-from palette import printPng
+from Printer import Printer
 
 def printFromDatabase(db_cfg):
 	try:
@@ -17,7 +17,9 @@ def printFromDatabase(db_cfg):
 		data = np.reshape( data, (w, w*2))
 
 		print( "Generate png...")
-		printPng( data, "olr.png")
+		printer = Printer()
+		printer.setcolor('json/olr.json')
+		printer.printpng( data, "olr.png")
 		db.close()
 
 	except mysql.connector.Error as err:
