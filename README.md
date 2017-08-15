@@ -1,7 +1,7 @@
 README
 ===
-### About
-This is the global satellite data visualization project.
+# Overview
+This is the global weather simulation data visualization project.
 
 ## Project structure
 ```
@@ -15,36 +15,72 @@ project
 └── index.html   
 ```
 
-## Deploy
-1. clone this project.
-2. generate output image.
-3. put images to `data/`
-4. serve the project ( except for `scripts/` )
-5. done
+## Enviroment
+1. Install [git][], 
+2. Install python*  (with [SciPy][]), and then [pillow][]
+3. Install a web server (optional)
+  
+For step 2, If you haven't have python installed, or have no idea how to install scipy, I would recommend [anaconda][], which is the [scipy][] compatible distribution I use. From then on, installing pillow should be as easy as running the command, `conda install pillow`.
 
-## Use scripts to generate images
+\* I use python 3, and it might not work with 2
+# Deploy
+## Instructions
+1. [clone the project](#clone-the-project)
+2. [generate images](#generate-images)
+3. [move images](#move-images)
+4. [serve it](#web-server)
+5. Review your works on your favorite browser ;)
+
+
+## Clone the project
+First, make sure you have [git][] installed, and it's added to your path.
+
+Now, from the commandline run
+`$ git clone https://github.com/hsinewu/earth.git <project_name>`
+
+The files should be downloaded to `./<project_name>/` folder, if <project_name> omitted, it should be at `./earth/`
+
+For more instructions on how to clone project, visit [github](https://help.github.com/articles/cloning-a-repository/)
+## Generate images
+Mainly, it's about `json/` and `palette.py`
 ```
 project
 └── scripts/
     │── json/        - user defined color table in json format
-    │── make_json.py - generate color.json (in grey scale) base on percentage
-    │── maria.py     - generate image from database via mysql.connector
-    │── master.py    - unused
+    │── make_json.py - generate color.json (in grey scale) base on percentage (experimental)
+    │── maria.py     - generate image from database via mysql.connector (experimental)
     │── palette.py   - generate image from local netcdf file, provides cil interface
-    └── print_csv.py - generate image from csv text file
+    └── print_csv.py - generate image from csv text file (experimental)
 ```
-### `palette.py`
-Generate images from local netcdf file, several comment-line arguments are requied.
-Show help: `python palette.py -h`
-#### Example:
+### palette .py
+*Purpose*: Generate images from local netcdf file
+*Input*: netcdf, [json](#json)
+*Output*: png
+
+Several comment-line arguments are provided, to show help run `python palette.py -h`.
+
+| Option | Definition | Format | Default |
+|-|-|-|-|
+| help | list help message | N/A (switch) | N/A |
+| time | starting date, also name of netcdf file | yyyyMMddhh | 2016120100 |
+| item | list of variable names to be rendered | 1+ space seperated strings | "temp2" |
+| dhour | length of time interval | integer* | 6 |
+| src | netcdf file path | directory | ./ |
+| dest | output path | directory | ./ |
+| force | overwrite existing images | N/A (switch) | False |
+
+\* Have some considerations when it's not dividable by 24, but haven't test it. Better use 1, 2, 3, 4, 6, 12, 24 or multiple. Or maybe it's just js problem but not python.
+
+*Example*:
 To generate variables `var1`, `var2`, `var3` from `2016120100.nc`, where the time interval is 6 hours:
 `$ python palette.py --item var1 var2 var3 --time 2016120100 --dhour 6`
 
-Currently `--time` argument is used to define the starting date of the data, also the name of the netcdf file. Accepted format is `yyyyMMddhh`.
 
 ### json/
-Defined color tables
-Example:
+*Purpose*: Defining color tables for each variables
+*Naming*: var1.json, which will be used to render `var1`, and so on
+
+*Example*:
 ```json
 {
 	"stops":[
@@ -59,12 +95,16 @@ Example:
 	]
 }
 ```
-`stops` defines **intervals**
-`palette` defines **colors**
-Also, there is an optional `offset` field. Which I use to transform units between `K` and `℃`.
+| Field | Definition | format |
+|-|-|-|
+| stops | breakpoint of colors | numbers |
+| palette | List of RGB values | 0~255, every 3 values form a RGB |
+| offset* | (optional) offset value added to stops | number |
 
-pseudo code:
-```python=
+\* I use it to transform units between `K` and `℃`, ex: `"offset":-273.15` .
+
+*pseudo code*: (regarding how values and colors are mapped)
+```python
 if val < stops[0]:
   color = palette[0]
 elif val < stops[1]:
@@ -74,31 +114,57 @@ else
   color = palette[-1] # last color
 ```
 
-### `make_json.py`
-Currently no commandline argument provided.
-Read the code and change corresponding vairbles.
-```python=
+### make_json .py
+*Purpose*: Generate json according to percentage.
+*Input*: netcdf
+*Output*: json
+
+*Usage*:
+Currently no arguments are provided, read the code and change corresponding vairbles.
+```python=18
 # in make_json.py
 if __name__ == '__main__':
-	ifn = 'file.nc'          # change this
-	items = ['var1', 'var2'] # change this
+	ifn = 'file.nc'          # change this to specify netcdf file name
+	items = ['var1', 'var2'] # change this to specify variable names
     # ...
 
 ```
 
-## Move images to `data/`
+### maria .py
+*Purpose*: Retrive data from database and generate a image.
+*Input*: Database
+*Output*: png
+
+*Usage*: configure `database.yaml`, then change the variable/table name in the code.
+```python=13
+elm, tbl = 'olr', ''
+cursor.execute( "select %s from %s;" % (elm, tbl))
+```
+
+### print_csv .py
+*Purpose*: Output image from text
+*Input*: text (space separated)
+*Output*: png
+
+*Example*:
+`$ python print_csv var1.json var1_001.txt`
+
+## Move images
+Move images to `data/`, this is defined as variable *ROOTDIR* in `earth.js`, which is the main script for this app.
 ```
 project
 └── data/
-    │── 2016120100/
-    │── 2016120200/
-    │── 2016120300/
-    └── dataset.json
+    │── 2016120100/   # dataset 1
+    │── 2016120200/   # dataset 2
+    │── ...           # and so on
+    └── dataset.json  # dataset schema
 ```
-### `dataset.json`
+
+### dataset.json
 Defining the schema of the set of data.
 Effectively, it will change options in dropdown menu. (dat.gui)
-Example:
+
+*Example*:
 ```json
 {
   "names":[
@@ -115,7 +181,56 @@ Example:
   "length": 181
 }
 ```
-`names`: list of report(**directory**) names (under `data/`) .
-`items`: list of **variables** in this set of data.
-`dh`: time interval, the value of `--dhour` when generating images.
-`length`: number of images for each variable(in one time period).
+| Field | Definition | Format |
+|-|-|-|
+| names | list of *dataset* names (under `data/`) . | Strings |
+| items | list of *variables* in this set of data. | Strings |
+| dh | time interval, the value of `--dhour` when generating images. | Integer |
+| length | number of images for each variable(in one time period). | Integer |
+> Notice that, according to the requirement, you can't mix datasets of different schema together. In that case, consider using [hash/](#hash) as an alternative.
+## Web Server
+### Chose a server
+### available GET parameter
+| Name | Purpose | Values |
+|-|-|-|
+| variable | set displaying *variable* | `items` defined in dataset.json |
+| report | set displaying *dataset* | `names` defined in dataset.json |
+| view | set display mode | "dataset" or "forecast" |
+| hash | set display data | String |
+
+## Miscellaneous
+### hash
+This was used to put uploaded data, but of course you can put yours too.
+```
+project
+└── hash/
+    └── my_data  # ?hash=my_data
+        │── 2016120100/   # dataset 1
+        └── dataset.json  # dataset schema
+
+```
+Basically, every subfolder in hash works simillary as `data/`, but it will only be loaded when explicitly specified by GET parameter *hash*.
+
+### legend
+To add a legend for `var1`, you need to add your new `.legend` under `.legends`, defining the values and unit.
+
+Then, go to `css/legend.css`, insert 2 rules and you are done.
+```css
+#legends.var1 > .legend:nth-child(4) {
+	display: block;
+}
+
+.legend:nth-child(4) {
+	background: linear-gradient(to top, #fff, #c0c0c0, #4040ff, #40a0ff, #40ffff, #ffff40, #ff8040, #ff4040); /* use your color */
+	line-height: calc( 250px/7); /* divided by how many values you have */
+}
+
+```
+
+### form.php
+Provides netcdf upload.
+
+[git]: https://git-scm.com/download/
+[scipy]: https://www.scipy.org
+[pillow]: https://python-pillow.org
+[anaconda]: https://www.continuum.io/downloads
