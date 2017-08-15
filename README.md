@@ -53,9 +53,9 @@ project
     └── print_csv.py - generate image from csv text file (experimental)
 ```
 ### palette .py
-*Purpose*: Generate images from local netcdf file
-*Input*: netcdf, [json](#json)
-*Output*: png
+*Purpose*: Generate images from local netcdf file  
+*Input*: netcdf, [json](#json)  
+*Output*: png  
 
 Several comment-line arguments are provided, to show help run `python palette.py -h`.
 
@@ -71,16 +71,16 @@ Several comment-line arguments are provided, to show help run `python palette.py
 
 \* Have some considerations when it's not dividable by 24, but haven't test it. Better use 1, 2, 3, 4, 6, 12, 24 or multiple. Or maybe it's just js problem but not python.
 
-*Example*:
+*Example*:  
 To generate variables `var1`, `var2`, `var3` from `2016120100.nc`, where the time interval is 6 hours:
 `$ python palette.py --item var1 var2 var3 --time 2016120100 --dhour 6`
 
 
 ### json/
-*Purpose*: Defining color tables for each variables
-*Naming*: var1.json, which will be used to render `var1`, and so on
+*Purpose*: Defining color tables for each variables  
+*Naming*: var1.json, which will be used to render `var1`, and so on  
 
-*Example*:
+*Example*:  
 ```json
 {
 	"stops":[
@@ -115,13 +115,13 @@ else
 ```
 
 ### make_json .py
-*Purpose*: Generate json according to percentage.
-*Input*: netcdf
-*Output*: json
+*Purpose*: Generate json according to percentage.  
+*Input*: netcdf  
+*Output*: json  
 
-*Usage*:
+*Usage*:  
 Currently no arguments are provided, read the code and change corresponding vairbles.
-```python=18
+```python
 # in make_json.py
 if __name__ == '__main__':
 	ifn = 'file.nc'          # change this to specify netcdf file name
@@ -131,22 +131,22 @@ if __name__ == '__main__':
 ```
 
 ### maria .py
-*Purpose*: Retrive data from database and generate a image.
-*Input*: Database
-*Output*: png
+*Purpose*: Retrive data from database and generate a image.  
+*Input*: Database  
+*Output*: png  
 
 *Usage*: configure `database.yaml`, then change the variable/table name in the code.
-```python=13
+```python
 elm, tbl = 'olr', ''
 cursor.execute( "select %s from %s;" % (elm, tbl))
 ```
 
 ### print_csv .py
-*Purpose*: Output image from text
-*Input*: text (space separated)
-*Output*: png
+*Purpose*: Output image from text  
+*Input*: text (space separated)  
+*Output*: png  
 
-*Example*:
+*Example*:  
 `$ python print_csv var1.json var1_001.txt`
 
 ## Move images
