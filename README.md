@@ -1,7 +1,10 @@
 README
 ===
 # Overview
-This is the global weather simulation data visualization project.
+This is the global weather simulation data visualization project.  
+
+![](https://i.imgur.com/k3L8m0c.png)
+
 
 ## Project structure
 ```
@@ -15,12 +18,12 @@ project
 └── index.html   
 ```
 
-## Enviroment
-1. Install [git][], 
-2. Install python*  (with [SciPy][]), and then [pillow][]
+## Environment
+1. Install [git], 
+2. Install python*  (with [SciPy]), and then [pillow]
 3. Install a web server (optional)
   
-For step 2, If you haven't have python installed, or have no idea how to install scipy, I would recommend [anaconda][], which is the [scipy][] compatible distribution I use. From then on, installing pillow should be as easy as running the command, `conda install pillow`.
+For step 2, If you haven't have python installed, or have no idea how to install scipy, I would recommend [anaconda], which is the [scipy] compatible distribution I use. From then on, installing pillow should be as easy as running the command, `conda install pillow`.
 
 \* I use python 3, and it might not work with 2
 # Deploy
@@ -33,7 +36,7 @@ For step 2, If you haven't have python installed, or have no idea how to install
 
 
 ## Clone the project
-First, make sure you have [git][] installed, and it's added to your path.
+First, make sure you have [git] installed, and it's added to your path.
 
 Now, from the commandline run
 `$ git clone https://github.com/hsinewu/earth.git <project_name>`
@@ -41,6 +44,7 @@ Now, from the commandline run
 The files should be downloaded to `./<project_name>/` folder, if <project_name> omitted, it should be at `./earth/`
 
 For more instructions on how to clone project, visit [github](https://help.github.com/articles/cloning-a-repository/)
+
 ## Generate images
 Mainly, it's about `json/` and `palette.py`
 ```
@@ -83,16 +87,16 @@ To generate variables `var1`, `var2`, `var3` from `2016120100.nc`, where the tim
 *Example*:  
 ```json
 {
-	"stops":[
+  "stops":[
         10, 20, 30, 40
-	]
-	,"palette":[
+  ]
+  ,"palette":[
         0, 0, 0,
         64, 64, 64,
         128, 128, 128,
         192, 192, 192,
         256, 256, 256
-	]
+  ]
 }
 ```
 | Field | Definition | format |
@@ -124,11 +128,12 @@ Currently no arguments are provided, read the code and change corresponding vair
 ```python
 # in make_json.py
 if __name__ == '__main__':
-	ifn = 'file.nc'          # change this to specify netcdf file name
-	items = ['var1', 'var2'] # change this to specify variable names
+  ifn = 'file.nc'          # change this to specify netcdf file name
+  items = ['var1', 'var2'] # change this to specify variable names
     # ...
 
 ```
+btw, don't forget do put your generated json file into `json/` folder.
 
 ### maria .py
 *Purpose*: Retrive data from database and generate a image.  
@@ -181,16 +186,34 @@ Effectively, it will change options in dropdown menu. (dat.gui)
   "length": 181
 }
 ```
+
 | Field | Definition | Format |
 |-|-|-|
 | names | list of *dataset* names (under `data/`) . | Strings |
 | items | list of *variables* in this set of data. | Strings |
 | dh | time interval, the value of `--dhour` when generating images. | Integer |
 | length | number of images for each variable(in one time period). | Integer |
+
 > Notice that, according to the requirement, you can't mix datasets of different schema together. In that case, consider using [hash/](#hash) as an alternative.
+
+
 ## Web Server
 ### Chose a server
-### available GET parameter
+Just use whatever you prefer, though if you want to use `form.php` it needs to support php.
+
+A short list of web servers:
++ [IIS] For windows
++ [nginx]
++ [apache]
+
+Also, if you want a more integrated solution:
++ [xampp]
++ [MAMP]
+
+The discussion of setting up and configuring web servers is out of the scope of this document.
+
+## Miscellaneous
+### Available GET parameter for `index.html`
 | Name | Purpose | Values |
 |-|-|-|
 | variable | set displaying *variable* | `items` defined in dataset.json |
@@ -198,7 +221,6 @@ Effectively, it will change options in dropdown menu. (dat.gui)
 | view | set display mode | "dataset" or "forecast" |
 | hash | set display data | String |
 
-## Miscellaneous
 ### hash
 This was used to put uploaded data, but of course you can put yours too.
 ```
@@ -212,19 +234,42 @@ project
 Basically, every subfolder in hash works simillary as `data/`, but it will only be loaded when explicitly specified by GET parameter *hash*.
 
 ### legend
-To add a legend for `var1`, you need to add your new `.legend` under `.legends`, defining the values and unit.
+##### TODO: make it easier to customize?
+To add a legend for `var1`, you need to modify html and css.
 
-Then, go to `css/legend.css`, insert 2 rules and you are done.
+HTML:
+Under `#legends` insert a `.legend>.legend-text+.legend-unit`, make your own values and unit.
+
+```htmlmixed
+<div class="legend"> <!-- 4th element -->
+    <div class="legend-text">295 265 235 205 175 145</div>
+    <div class="legend-unit">K</div>
+</div>
+```
+
+CSS:
+Go to `css/legend.css`, insert 2 rules and you are done.
+In the follwing, you will have to change both "4"s in `nth-child(4)` according to your positioning in html, from previous step.
 ```css
 #legends.var1 > .legend:nth-child(4) {
-	display: block;
+  display: block;
 }
 
 .legend:nth-child(4) {
-	background: linear-gradient(to top, #fff, #c0c0c0, #4040ff, #40a0ff, #40ffff, #ffff40, #ff8040, #ff4040); /* use your color */
-	line-height: calc( 250px/7); /* divided by how many values you have */
+  background: linear-gradient(to top, #fff, #c0c0c0, #4040ff, #40a0ff, #40ffff, #ffff40, #ff8040, #ff4040); /* use your color */
+  line-height: calc( 250px/7); /* divided by how many values you have */
 }
+```
 
+Notes:
+This works because in javascript it will update `#legends`'s className base on current display.
+pseudo code:
+
+```javascript
+function onUpdate() {
+    document.getElementById('legends').className = viz.item;
+    // ...
+}
 ```
 
 ### form.php
@@ -234,3 +279,9 @@ Provides netcdf upload.
 [scipy]: https://www.scipy.org
 [pillow]: https://python-pillow.org
 [anaconda]: https://www.continuum.io/downloads
+[IIS]: https://www.iis.net/learn/get-started
+[nginx]: https://nginx.org/en/
+[apache]: https://httpd.apache.org/
+[xampp]: https://www.apachefriends.org/
+[MAMP]: https://www.mamp.info/en/
+
